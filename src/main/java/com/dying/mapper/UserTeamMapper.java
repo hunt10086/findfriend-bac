@@ -25,7 +25,7 @@ public interface UserTeamMapper extends BaseMapper<UserTeam> {
      * @param userId
      * @return
      */
-    @Select("select distinct team_id from user_team where user_team.team_id not in(select team_id from user_team where user_id = #{userId} AND is_delete = 0)")
+    //@Select("select distinct team_id from user_team where user_team.team_id not in(select team_id from user_team where user_id = #{userId} AND is_delete = 0)")
     Long[] selectTeam(Long userId);
 }
 

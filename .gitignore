@@ -12,6 +12,10 @@ target/
 .settings
 .springBeans
 .sts4-cache
+###
+# 忽略本地环境配置文件
+src/main/resources/application-local.yml
+
 
 ### IntelliJ IDEA ###
 .idea
@@ -31,3 +35,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+

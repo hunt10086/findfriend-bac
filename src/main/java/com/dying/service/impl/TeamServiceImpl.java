@@ -101,7 +101,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //2. 返回所有队伍 不包含创建的和加入的
         Long[] Ids = userTeamMapper.selectTeam(loginUser.getId());
-        System.out.println(Ids.length);
+        if (Ids.length==0) {
+            return new ArrayList<>();
+        }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("id", (Object[]) Ids);
         List<Team> teamList = teamMapper.selectList(queryWrapper);
@@ -122,7 +124,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     @Override
     public boolean updateTeam(Long id, User loginUser, TeamDTO teamDto) {
         // 1. 检验请求参数是否为空
-        if (teamDto == null ||id<=0) {
+        if (teamDto == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         // 2. 检验用户登录态
@@ -130,7 +132,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         Team team = teamMapper.selectById(id);
-         Long uId=team.getUserId();
+        Long uId = team.getUserId();
         // 3.检验身份为队长或管理员
         if (loginUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), uId)) {
             throw new BusinessException(ErrorCode.NO_AUTO, "无权限");
@@ -159,12 +161,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (description.length() > TEAM_MAX_DESCRIPTION_LENGTH) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍描述过长");
         }
-        if(icon.length()>TEAM_MAX_ICON_LENGTH){
+        if (icon.length() > TEAM_MAX_ICON_LENGTH) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像链接过长");
         }
         // 8.若信息相同不触发更新
         if (teamName.equals(team.getTeamName()) && description.equals(team.getDescription())
-                && status == team.getStatus() && maxNum == team.getMaxNum()&&icon.equals(team.getIcon())) {
+                && status == team.getStatus() && maxNum == team.getMaxNum() && icon.equals(team.getIcon())) {
             if (status == 1) {
                 if (password.equals(teamDto.getPassword())) {
                     return true;
@@ -348,7 +350,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamDTO> getTeams(User loginUser){
+    public List<TeamDTO> getTeams(User loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -358,7 +360,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         queryWrapper1.eq("user_id", loginUser.getId());
         List<UserTeam> userTeams = userTeamMapper.selectList(queryWrapper1);
         List<TeamDTO> teamDTOs = new ArrayList<>();
-        for(UserTeam userTeam : userTeams) {
+        for (UserTeam userTeam : userTeams) {
             Long teamId = userTeam.getTeamId();
             Team team = teamMapper.selectById(teamId);
             TeamDTO teamDTO = new TeamDTO();
@@ -374,8 +376,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamDTO> searchTeam(String teamName, User loginUser){
-        if(loginUser==null||teamName==null){
+    public List<TeamDTO> searchTeam(String teamName, User loginUser) {
+        if (loginUser == null || teamName == null) {
             return null;
         }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
@@ -396,15 +398,15 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamDTO> getOneTeam(Long teamId, User loginUser){
-        if(teamId<=0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
+    public List<TeamDTO> getOneTeam(Long teamId, User loginUser) {
+        if (teamId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍不存在");
         }
-        if(loginUser==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"未登录");
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("id",teamId);
+        queryWrapper.eq("id", teamId);
         List<Team> teamList = teamMapper.selectList(queryWrapper);
         List<TeamDTO> teamDTOs = new ArrayList<>();
         for (Team team : teamList) {

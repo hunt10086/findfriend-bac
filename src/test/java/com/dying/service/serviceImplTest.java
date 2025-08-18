@@ -1,6 +1,7 @@
 package com.dying.service;
 
 
+import cn.hutool.json.JSONUtil;
 import com.dying.domain.User;
 import com.dying.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
@@ -58,27 +59,47 @@ private UserMapper userMapper;
 //     *
 //     */
 //
-//    @Test
-//    public void insertUsersTest2(){
-//        final int NUM=100000;
-//        long start = System.currentTimeMillis();
-//        for (int i = 0; i < NUM; i++) {
-//            User user=new User();
-//            user.setUserName("black");
-//            user.setUserAccount("black54"+i);
-//            user.setAvatarUrl("https://tse2-mm.cn.bing.net/th/id/OIP-C.7GLMYPqMlt2LgkbPsOnDIAAAAA?cb=iwp2&rs=1&pid=ImgDetMain");
-//            user.setGender(0);
-//            user.setTags("[]");
-//            user.setUserPassword("12345678");
-//            user.setProfile("阿巴");
-//            user.setUserStatus(0);
-//            user.setUpdateTime(new Date());
-//            user.setCreateTime(new Date());
-//            userMapper.insert(user);
-//        }
-//        long end = System.currentTimeMillis();
-//        System.out.println("耗时："+(end-start));
-//    }
+    @Test
+    public void insertUsersTest2(){
+        final int NUM=1000;
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < NUM; i++) {
+            User user=new User();
+            user.setUserName("black");
+            user.setUserAccount("black9993"+i);
+            user.setAvatarUrl("https://tse2-mm.cn.bing.net/th/id/OIP-C.7GLMYPqMlt2LgkbPsOnDIAAAAA?cb=iwp2&rs=1&pid=ImgDetMain");
+            user.setGender(0);
+            user.setTags("['Java']");
+            user.setUserPassword("12345678");
+            user.setProfile("666");
+            user.setUserStatus(0);
+            user.setUpdateTime(new Date());
+            user.setCreateTime(new Date());
+            userMapper.insert(user);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println("耗时："+(end-start));
+    }
+
+    @Test
+    public void insertUsersTest4(){
+        final int NUM=1000;
+        for (int i = 0; i < NUM; i++) {
+            User user=new User();
+            user.setUserName("black");
+            user.setUserAccount("black333"+i);
+            user.setAvatarUrl("https://tse2-mm.cn.bing.net/th/id/OIP-C.7GLMYPqMlt2LgkbPsOnDIAAAAA?cb=iwp2&rs=1&pid=ImgDetMain");
+            user.setGender(0);
+            String []s={"Java","男"};
+            user.setTags(JSONUtil.toJsonStr(s));
+            user.setUserPassword("12345678");
+            user.setProfile("666");
+            user.setUserStatus(0);
+            user.setUpdateTime(new Date());
+            user.setCreateTime(new Date());
+            userMapper.insert(user);
+        }
+    }
 //
 //    /**
 //     * mybatisPlus 分组插入

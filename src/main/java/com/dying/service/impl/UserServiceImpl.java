@@ -188,7 +188,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return 0;
         }
         // 移除登录态
-        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        request.getSession().invalidate();
         return 1;
     }
 

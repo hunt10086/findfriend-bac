@@ -14,6 +14,17 @@
             <result property="isDelete" column="is_delete" />
     </resultMap>
 
+    <select id="selectTeam" resultType="java.lang.Long">
+        SELECT DISTINCT team_id
+        FROM user_team
+        WHERE team_id NOT IN (
+            SELECT team_id
+            FROM user_team
+            WHERE user_id = #{userId}
+              AND is_delete = 0
+        )
+    </select>
+
     <sql id="Base_Column_List">
         id,user_id,team_id,join_time,create_time,update_time,
         is_delete
