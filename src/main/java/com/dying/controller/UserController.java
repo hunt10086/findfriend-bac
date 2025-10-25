@@ -1,5 +1,6 @@
 package com.dying.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -271,5 +272,23 @@ public class  UserController {
         }
         return user1.getId();
     }
+
+//    @GetMapping("/get/user")
+//    public BaseResponse<UserVo> getUserById(@PathParam("id") Long id,HttpServletRequest request){
+//        Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
+//        User currentUser = (User) attribute;
+//        if(currentUser == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+//        }
+//        User user = userService.getById(id);
+//        if(user==null){
+//            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
+//        }
+//        User saftyUser = userService.getSaftyUser(user);
+//        UserVo userVo=new UserVo();
+//        BeanUtil.copyProperties(user,userVo);
+//        userVo.setDistance(0.0);
+//        return ResultUtils.success(userVo);
+//    }
 
 }

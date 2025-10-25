@@ -1,5 +1,9 @@
 package com.dying.common;
 
+
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
 
     PARAMS_ERROR(4000,"请求数据错误",""),
@@ -20,18 +24,6 @@ public enum ErrorCode {
         this.code = code;
         this.message = message;
         this.description = description;
-    }
-
-    public int getCode() {
-        return code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
 

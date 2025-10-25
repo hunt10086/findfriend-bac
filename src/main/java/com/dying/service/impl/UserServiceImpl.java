@@ -314,7 +314,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             double longitude2 = user.getLongitude();
             double latitude2 = user.getLatitude();
-            double distance=getDistance(latitude,longitude,latitude2,longitude2);
+            double distance=getDistance(longitude,latitude,longitude2,latitude2);
             if(distance<1000){
                 UserVo userVo = new UserVo();
                 BeanUtils.copyProperties(user,userVo);
@@ -329,7 +329,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
 
-    public double getDistance(Double latitude1, Double longitude1, Double latitude2, Double longitude2) {
+    public double getDistance(Double longitude1, Double latitude1, Double longitude2, Double latitude2) {
         geoService.addLocation("cities", "Beijing", longitude1, latitude1);
         geoService.addLocation("cities", "Shanghai", longitude2, latitude2);
 
