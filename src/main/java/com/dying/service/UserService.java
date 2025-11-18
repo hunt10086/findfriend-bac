@@ -6,6 +6,7 @@ import com.dying.domain.UserVo;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
 * @author 666
@@ -32,4 +33,13 @@ public interface UserService extends IService<User> {
     List<User> backLike(User loginUser,Integer count);
 
     List<UserVo> getNearUser(Long userId);
+
+    /**
+     * 根据标签分页查询用户
+     * @param tagsList 标签列表
+     * @param currentPage 当前页码
+     * @param pageSize 每页大小
+     * @return 分页用户列表
+     */
+    IPage<User> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize);
 }

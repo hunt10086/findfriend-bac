@@ -1,9 +1,8 @@
 package com.dying.controller;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
@@ -16,15 +15,12 @@ import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import com.dying.service.impl.emailServiceImpl;
-import com.dying.utils.RegexUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -185,6 +181,24 @@ public class  UserController {
         }
         List<User> list=userService.searchAllByTags(tagsList);
         return ResultUtils.success(list);
+    }
+
+    @Operation(summary = "根据标签分页查询用户")
+    @GetMapping("/search/tags/page")
+    public BaseResponse<IPage<User>> searchUsersByTagsWithPagination(
+            @RequestParam(required = false) List<String> tagsList,
+            @RequestParam(defaultValue = "1") long currentPage,
+            @RequestParam(defaultValue = "15") long pageSize) {
+
+        // 参数校验
+        if (CollectionUtils.isEmpty(tagsList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表不能为空");
+        }
+
+        // 执行分页查询
+        IPage<User> userPage = userService.searchUsersByTagsWithPagination(tagsList, currentPage, pageSize);
+
+        return ResultUtils.success(userPage);
     }
 
     @Operation(summary = "用户更新")

@@ -336,6 +336,72 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 计算距离
         return geoService.getDistance("cities", "Beijing", "Shanghai");
     }
+
+    @Override
+    public IPage<User> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize) {
+        // 参数校验
+        if (CollectionUtils.isEmpty(tagsList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表不能为空");
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        if (pageSize < 1) {
+            pageSize = 15; // 默认每页15条
+        }
+
+        // 生成缓存键：基于标签列表、页码和页面大小
+        String tagsKey = String.join(",", tagsList);
+        String cacheKey = USER_SEARCH + ":tags:" + tagsKey + ":page:" + currentPage + ":size:" + pageSize;
+
+        // 先从Redis缓存中查询
+        String cachedResult = stringRedisTemplate.opsForValue().get(cacheKey);
+        if (StringUtils.isNotBlank(cachedResult)) {
+            try {
+                // 从缓存中获取分页信息
+                IPage<User> cachedPage = JSONUtil.toBean(cachedResult, Page.class);
+                log.info("从Redis缓存中获取标签查询结果，标签：{}，页码：{}", tagsKey, currentPage);
+                return cachedPage;
+            } catch (Exception e) {
+                log.warn("缓存数据解析失败，将重新查询数据库", e);
+            }
+        }
+
+        // 缓存未命中，查询数据库
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+
+        // 构建查询条件：匹配所有标签
+        for (String tag : tagsList) {
+            queryWrapper.like("tags", tag);
+        }
+
+        // 按创建时间降序排列
+        queryWrapper.orderByDesc("create_time");
+
+        // 创建分页对象
+        Page<User> page = new Page<>(currentPage, pageSize);
+
+        // 执行分页查询
+        IPage<User> userPage = userMapper.selectPage(page, queryWrapper);
+
+        // 对查询结果进行脱敏处理
+        List<User> safeUsers = userPage.getRecords().stream()
+                .map(this::getSaftyUser)
+                .collect(Collectors.toList());
+
+        userPage.setRecords(safeUsers);
+
+        // 将查询结果存入Redis缓存，设置25分钟过期时间
+        try {
+            String pageJson = JSONUtil.toJsonStr(userPage);
+            stringRedisTemplate.opsForValue().set(cacheKey, pageJson, 25, TimeUnit.MINUTES);
+            log.info("标签查询结果已缓存，标签：{}，页码：{}，缓存过期时间：25分钟", tagsKey, currentPage);
+        } catch (Exception e) {
+            log.warn("缓存写入失败", e);
+        }
+
+        return userPage;
+    }
 }
 
 
