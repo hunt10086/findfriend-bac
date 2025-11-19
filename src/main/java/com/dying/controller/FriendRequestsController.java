@@ -1,0 +1,68 @@
+package com.dying.controller;
+
+import com.dying.common.BaseResponse;
+import com.dying.common.ErrorCode;
+import com.dying.common.ResultUtils;
+import com.dying.domain.FriendRequests;
+import com.dying.domain.User;
+import com.dying.domain.request.FriendRequestsRequest;
+import com.dying.exception.BusinessException;
+import com.dying.service.FriendRequestsService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
+
+/**
+ * 好友申请接口
+ *
+ * @author daylight
+ */
+@RestController
+@RequestMapping("/friendRequests")
+@Tag(name = "好友申请接口")
+@CrossOrigin(origins = {"http://www.seestars.top:9090", "http://localhost:9090"}, allowCredentials = "true")
+@Slf4j
+public class FriendRequestsController {
+
+    @Resource
+    private FriendRequestsService friendRequestsService;
+
+    @Operation(summary = "发送好友申请")
+    @PostMapping("/send")
+    public BaseResponse<Boolean> sendFriendRequest(@RequestBody FriendRequestsRequest friendRequestsRequest, HttpServletRequest request) {
+        if (friendRequestsRequest == null || friendRequestsRequest.getFriendUserId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+
+        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
+        }
+
+        boolean result = friendRequestsService.sendFriendRequest(
+                friendRequestsRequest.getFriendUserId(),
+                request,
+                friendRequestsRequest.getMessage()
+        );
+        return ResultUtils.success(result);
+    }
+
+    @Operation(summary = "获取好友申请列表")
+    @GetMapping("/list")
+    public BaseResponse<List<FriendRequests>> getFriendRequests(HttpServletRequest request) {
+        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
+        }
+
+        List<FriendRequests> friendRequests = friendRequestsService.getFriendRequest(request);
+        return ResultUtils.success(friendRequests);
+    }
+}
