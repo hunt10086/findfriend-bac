@@ -9,6 +9,7 @@ import com.dying.domain.User;
 import com.dying.domain.request.BlogRequest;
 import com.dying.exception.BusinessException;
 import com.dying.service.BlogService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class BlogController {
     @Resource
     private BlogService blogService;
 
+    @Operation(summary = "创建博客")
     @PostMapping("/create")
     public BaseResponse<String> createBlog(@RequestBody BlogRequest blog, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -48,6 +50,7 @@ public class BlogController {
         }
     }
 
+    @Operation(summary = "更新博客")
     @PostMapping("/update")
     public BaseResponse<String> updateBlog(@RequestBody BlogRequest blog, HttpServletRequest request, Long id) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -65,6 +68,7 @@ public class BlogController {
         }
     }
 
+    @Operation(summary = "获取博客列表")
     @GetMapping("/list")
     public BaseResponse<List<BlogVo>> getBlogList(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -75,6 +79,7 @@ public class BlogController {
         return ResultUtils.success(blogService.getBlogList(currentUser));
     }
 
+    @Operation(summary = "删除博客")
     @GetMapping("/delete")
     public BaseResponse<Boolean> deleteBlog(HttpServletRequest request, Long id) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -89,6 +94,7 @@ public class BlogController {
         }
     }
 
+    @Operation(summary = "点赞博客")
     @GetMapping("like")
     public BaseResponse<Boolean> getBlogLike(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -103,6 +109,7 @@ public class BlogController {
         return ResultUtils.success(blogService.like(blogId, userId));
     }
 
+    @Operation(summary = "获取单个博客")
     @GetMapping("/getOne")
     public BaseResponse<Blog> getBlog(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -117,6 +124,7 @@ public class BlogController {
         return ResultUtils.success(blogService.getBlog(blogId, userId));
     }
 
+    @Operation(summary = "获取我的博客列表")
     @GetMapping("/my/list")
     public BaseResponse<List<BlogVo>> getMyBlogList(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);

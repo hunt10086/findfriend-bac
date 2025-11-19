@@ -7,6 +7,7 @@ import com.dying.domain.User;
 import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.FriendMessagesService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,7 @@ public class FriendMessageController {
      * @param request  HTTP请求
      * @return 聊天记录列表
      */
+    @Operation(summary = "获取与指定好友的聊天记录")
     @GetMapping("/list")
     public BaseResponse<List<FriendMessages>> getFriendMessages(@RequestParam Long friendId, HttpServletRequest request) {
         // 检查用户是否登录
@@ -54,6 +56,7 @@ public class FriendMessageController {
      * @param request HTTP请求
      * @return 未读消息数量
      */
+    @Operation(summary = "获取未读消息数量")
     @GetMapping("/unreadCount")
     public BaseResponse<Integer> getUnreadMessageCount(HttpServletRequest request) {
         // 检查用户是否登录
@@ -76,6 +79,7 @@ public class FriendMessageController {
      * @param request  HTTP请求
      * @return 是否成功
      */
+    @Operation(summary = "标记消息为已读")
     @PostMapping("/markAsRead")
     public BaseResponse<Boolean> markMessagesAsRead(@RequestParam Long friendId, HttpServletRequest request) {
         // 检查用户是否登录

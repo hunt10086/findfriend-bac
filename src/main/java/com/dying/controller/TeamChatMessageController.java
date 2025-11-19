@@ -8,6 +8,7 @@ import com.dying.domain.vo.TeamChatMessageVo;
 import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.TeamChatMessageService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class TeamChatMessageController {
     private TeamChatMessageService teamChatMessageService;
 
     // 发送消息
+    @Operation(summary = "发送队伍聊天消息")
     @PostMapping("/send")
     public BaseResponse<Boolean> sendMessage(@RequestBody TeamChatMessageRequest request, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
         Object attribute = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
@@ -37,6 +39,7 @@ public class TeamChatMessageController {
     }
 
     // 获取队伍消息列表
+    @Operation(summary = "获取队伍消息列表")
     @GetMapping("/list")
     public BaseResponse<List<TeamChatMessageVo>> getMessageList(@RequestParam Long teamId, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
         Object attribute = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);

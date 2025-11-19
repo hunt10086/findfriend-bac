@@ -31,7 +31,6 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/team")
-@Tag(name="队伍接口")
 @CrossOrigin(origins = {"http://www.seestars.top:9090", "http://localhost:9090"}, allowCredentials = "true")
 @Slf4j
 public class TeamController {
@@ -183,6 +182,7 @@ public class TeamController {
         return ResultUtils.success(team.getUserId());
     }
 
+    @Operation(summary = "获取队伍信息")
     @GetMapping("/get/team")
     public BaseResponse<List<TeamDTO>> getTeam(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);

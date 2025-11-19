@@ -7,6 +7,7 @@ import com.dying.domain.User;
 import com.dying.domain.UserTeam;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserTeamService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,13 +28,13 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/teamUser")
-@Tag(name="展示队伍成员信息")
 @CrossOrigin(origins = {"http://www.seestars.top:9090", "http://localhost:9090"}, allowCredentials = "true")
 @Slf4j
 public class UserTeamController {
     @Resource
     private UserTeamService userTeamService;
 
+    @Operation(summary = "获取队伍成员列表")
     @GetMapping("/list")
     public BaseResponse<List<User>> list(Long teamId, HttpServletRequest request) {
         if(teamId == null||teamId<=0){

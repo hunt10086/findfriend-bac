@@ -8,6 +8,7 @@ import com.dying.domain.User;
 import com.dying.domain.UserComment;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserCommentService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ public class CommentController {
     @Resource
     private UserCommentService userCommentService;
 
+    @Operation(summary = "创建评论")
     @GetMapping("/create")
     public BaseResponse<UserComment> create(String comment,Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
@@ -48,6 +50,7 @@ public class CommentController {
         }
     }
 
+    @Operation(summary = "获取评论列表")
     @GetMapping("/list")
     public BaseResponse<List<CommentVo>> list(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
