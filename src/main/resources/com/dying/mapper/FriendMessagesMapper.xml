@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dying.mapper.FriendMessagesMapper">
 
-    <resultMap id="BaseResultMap" type="com.dying.domain.FriendMessages">
+    <resultMap id="BaseResultMap" type="com.dying.domain.po.FriendMessages">
             <id property="id" column="id" />
             <result property="senderId" column="sender_id" />
             <result property="receiverId" column="receiver_id" />

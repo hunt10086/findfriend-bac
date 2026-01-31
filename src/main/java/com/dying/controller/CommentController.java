@@ -3,9 +3,9 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.CommentVo;
-import com.dying.domain.User;
-import com.dying.domain.UserComment;
+import com.dying.domain.vo.CommentVO;
+import com.dying.domain.po.User;
+import com.dying.domain.po.UserComment;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserCommentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,13 +52,13 @@ public class CommentController {
 
     @Operation(summary = "获取评论列表")
     @GetMapping("/list")
-    public BaseResponse<List<CommentVo>> list(Long blogId, HttpServletRequest request) {
+    public BaseResponse<List<CommentVO>> list(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        List<CommentVo> list=userCommentService.getAllComments(blogId);
+        List<CommentVO> list=userCommentService.getAllComments(blogId);
         if(list==null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }else{

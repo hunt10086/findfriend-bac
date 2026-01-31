@@ -4,16 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
-import com.dying.domain.CommentVo;
-import com.dying.domain.User;
-import com.dying.domain.UserComment;
+import com.dying.domain.vo.CommentVO;
+import com.dying.domain.po.User;
+import com.dying.domain.po.UserComment;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserCommentService;
 import com.dying.mapper.UserCommentMapper;
-import com.dying.service.UserService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,23 +51,23 @@ public class UserCommentServiceImpl extends ServiceImpl<UserCommentMapper, UserC
     }
 
     @Override
-    public List<CommentVo> getAllComments(Long blogId){
+    public List<CommentVO> getAllComments(Long blogId){
         if(blogId==null||blogId<0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         QueryWrapper<UserComment> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("blog_id", blogId);
         queryWrapper.orderByDesc("create_time");
-        List<CommentVo> list=new ArrayList<>();
+        List<CommentVO> list=new ArrayList<>();
         List<UserComment> userComments = userCommentMapper.selectList(queryWrapper);
         for(UserComment userComment : userComments) {
             User user=userMapper.selectById(userComment.getUserId());
-            CommentVo commentVo=new CommentVo();
-            commentVo.setUserName(user.getUserName());
-            commentVo.setAvatarUrl(user.getAvatarUrl());
-            commentVo.setCreateTime(userComment.getCreateTime());
-            commentVo.setContent(userComment.getContent());
-            list.add(commentVo);
+            CommentVO commentVO=new CommentVO();
+            commentVO.setUserName(user.getUserName());
+            commentVO.setAvatarUrl(user.getAvatarUrl());
+            commentVO.setCreateTime(userComment.getCreateTime());
+            commentVO.setContent(userComment.getContent());
+            list.add(commentVO);
         }
         return list;
     }

@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dying.mapper.FriendRequestsMapper">
 
-    <resultMap id="BaseResultMap" type="com.dying.domain.FriendRequests">
+    <resultMap id="BaseResultMap" type="com.dying.domain.po.FriendRequests">
             <id property="id" column="id" />
             <result property="fromUserId" column="from_user_id" />
             <result property="toUserId" column="to_user_id" />

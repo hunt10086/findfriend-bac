@@ -1,7 +1,7 @@
 package com.dying.service;
 
-import com.dying.domain.CommentVo;
-import com.dying.domain.UserComment;
+import com.dying.domain.vo.CommentVO;
+import com.dying.domain.po.UserComment;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 */
 public interface UserCommentService extends IService<UserComment> {
 
-    UserComment createComment(String  comment,Long blogID, Long userId);
+    UserComment createComment(String  comment, Long blogId, Long userId);
 
-    List<CommentVo> getAllComments(Long blogId);
+    List<CommentVO> getAllComments(Long blogId);
 }

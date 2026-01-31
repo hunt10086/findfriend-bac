@@ -1,6 +1,6 @@
 package com.dying.service;
 
-import com.dying.domain.FriendMessages;
+import com.dying.domain.po.FriendMessages;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

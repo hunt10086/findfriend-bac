@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.dying.common.ErrorCode;
-import com.dying.domain.Blog;
-import com.dying.domain.BlogVo;
-import com.dying.domain.User;
+import com.dying.domain.po.Blog;
+import com.dying.domain.vo.BlogVO;
+import com.dying.domain.po.User;
 import com.dying.domain.request.BlogRequest;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
@@ -102,20 +102,20 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public List<BlogVo> getBlogList(User loginUser){
+    public List<BlogVO> getBlogList(User loginUser){
         if(loginUser == null||loginUser.getId()==null||loginUser.getId()<0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"未登录");
         }
         QueryWrapper<Blog> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("praise");
         List<Blog> blogList = blogMapper.selectList(queryWrapper);
-        List<BlogVo> list=new ArrayList<>();
+        List<BlogVO> list=new ArrayList<>();
         for(Blog blog : blogList){
             User user=userMapper.selectById(blog.getUserId());
-            BlogVo blogVo=new BlogVo();
-            BeanUtils.copyProperties(blog,blogVo);
-            blogVo.setAvatarUrl(user.getAvatarUrl());
-            list.add(blogVo);
+            BlogVO blogVO=new BlogVO();
+            BeanUtils.copyProperties(blog,blogVO);
+            blogVO.setAvatarUrl(user.getAvatarUrl());
+            list.add(blogVO);
         }
         return list;
     }
@@ -143,6 +143,9 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
             return false;
         }
         Blog blog = blogMapper.selectById(blogId);
+        if(blog==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"博客不存在或被删除");
+        }
         String key=BLOG_LIKE+blogId+":";
         Boolean isMember = stringRedisTemplate.opsForSet().isMember(key, userId + "");
         if(BooleanUtil.isTrue(isMember)){
@@ -156,6 +159,21 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
+    public boolean isLike(Long blogId, Long userId){
+        if(blogId==null||userId==null||userId<0||blogId<0) {
+            return false;
+        }
+        Blog blog = blogMapper.selectById(blogId);
+        if(blog==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"博客不存在或被删除");
+        }
+        String key=BLOG_LIKE+blogId+":";
+        Boolean isMember = stringRedisTemplate.opsForSet().isMember(key, userId + "");
+        return BooleanUtil.isTrue(isMember);
+
+    }
+
+    @Override
     public Blog getBlog(Long blogId, Long userId){
         if(blogId==null||userId==null||userId<0||blogId<0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求失败");
@@ -164,20 +182,20 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public List<BlogVo> getMyBlog(Long userId){
+    public List<BlogVO> getMyBlog(Long userId){
         if(userId==null||userId<0){
             return null;
         }
         QueryWrapper<Blog> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",userId);
         List<Blog> blogList = blogMapper.selectList(queryWrapper);
-        List<BlogVo> list=new ArrayList<>();
+        List<BlogVO> list=new ArrayList<>();
         for(Blog blog : blogList){
             User user=userMapper.selectById(blog.getUserId());
-            BlogVo blogVo=new BlogVo();
-            BeanUtils.copyProperties(blog,blogVo);
-            blogVo.setAvatarUrl(user.getAvatarUrl());
-            list.add(blogVo);
+            BlogVO blogVO=new BlogVO();
+            BeanUtils.copyProperties(blog,blogVO);
+            blogVO.setAvatarUrl(user.getAvatarUrl());
+            list.add(blogVO);
         }
         return list;
     }

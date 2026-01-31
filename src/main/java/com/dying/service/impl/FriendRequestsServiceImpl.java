@@ -2,9 +2,9 @@ package com.dying.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
-import com.dying.domain.FriendRequests;
-import com.dying.domain.Friends;
-import com.dying.domain.User;
+import com.dying.domain.po.FriendRequests;
+import com.dying.domain.po.Friends;
+import com.dying.domain.po.User;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.FriendsMapper;
 import com.dying.service.FriendRequestsService;

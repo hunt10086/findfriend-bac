@@ -1,10 +1,10 @@
 package com.dying.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dying.domain.Team;
-import com.dying.domain.User;
+import com.dying.domain.po.Team;
+import com.dying.domain.po.User;
 import com.dying.domain.request.CreateTeamRequest;
-import com.dying.domain.request.TeamDTO;
+import com.dying.domain.dto.TeamDTO;
 
 import java.util.List;
 

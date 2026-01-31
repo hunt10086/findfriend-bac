@@ -2,16 +2,14 @@ package com.dying.service;
 
 
 import cn.hutool.json.JSONUtil;
-import com.dying.domain.User;
+import com.dying.domain.po.User;
 import com.dying.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @SpringBootTest
 @MapperScan("com.dying.mapper")

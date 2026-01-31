@@ -1,18 +1,13 @@
-package com.dying.domain;
+package com.dying.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
-
-import java.util.Date;
 
 /**
  * @Author daylight
  * @Date 2025/7/13 23:02
  */
 @Data
-public class UserVo {
+public class UserVO {
     /**
      * 主键
      */

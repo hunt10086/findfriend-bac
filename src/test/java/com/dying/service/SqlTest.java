@@ -1,8 +1,6 @@
 package com.dying.service;
 
-import cn.hutool.core.thread.BlockPolicy;
-import com.dying.domain.Blog;
-import lombok.Data;
+import com.dying.domain.po.Blog;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;

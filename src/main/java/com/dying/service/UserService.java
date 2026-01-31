@@ -1,8 +1,8 @@
 package com.dying.service;
 
-import com.dying.domain.User;
+import com.dying.domain.po.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dying.domain.UserVo;
+import com.dying.domain.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -32,7 +32,7 @@ public interface UserService extends IService<User> {
 
     List<User> backLike(User loginUser,Integer count);
 
-    List<UserVo> getNearUser(Long userId);
+    List<UserVO> getNearUser(Long userId);
 
     /**
      * 根据标签分页查询用户

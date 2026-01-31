@@ -2,8 +2,8 @@ package com.dying.controller;
 
 import com.dying.common.BaseResponse;
 import com.dying.common.ResultUtils;
-import com.dying.domain.FriendMessages;
-import com.dying.domain.User;
+import com.dying.domain.po.FriendMessages;
+import com.dying.domain.po.User;
 import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.FriendMessagesService;

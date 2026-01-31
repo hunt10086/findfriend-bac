@@ -1,4 +1,4 @@
-package com.dying.domain;
+package com.dying.domain.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

@@ -2,16 +2,16 @@ package com.dying.controller;
 
 import com.dying.common.BaseResponse;
 import com.dying.common.ResultUtils;
-import com.dying.domain.User;
+import com.dying.domain.po.User;
 import com.dying.domain.request.TeamChatMessageRequest;
-import com.dying.domain.vo.TeamChatMessageVo;
+import com.dying.domain.vo.TeamChatMessageVO;
 import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.TeamChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
@@ -41,7 +41,7 @@ public class TeamChatMessageController {
     // 获取队伍消息列表
     @Operation(summary = "获取队伍消息列表")
     @GetMapping("/list")
-    public BaseResponse<List<TeamChatMessageVo>> getMessageList(@RequestParam Long teamId, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
+    public BaseResponse<List<TeamChatMessageVO>> getMessageList(@RequestParam Long teamId, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
         Object attribute = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
@@ -52,7 +52,7 @@ public class TeamChatMessageController {
         if (!isMember) {
             return ResultUtils.error(403, "无权限", null);
         }
-        List<TeamChatMessageVo> list = teamChatMessageService.getTeamChatMessages(teamId);
+        List<TeamChatMessageVO> list = teamChatMessageService.getTeamChatMessages(teamId);
         return ResultUtils.success(list);
     }
 } 

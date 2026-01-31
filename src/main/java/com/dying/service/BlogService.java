@@ -1,9 +1,9 @@
 package com.dying.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dying.domain.Blog;
-import com.dying.domain.BlogVo;
-import com.dying.domain.User;
+import com.dying.domain.po.Blog;
+import com.dying.domain.vo.BlogVO;
+import com.dying.domain.po.User;
 import com.dying.domain.request.BlogRequest;
 
 import java.util.List;
@@ -19,13 +19,15 @@ public interface BlogService extends IService<Blog> {
 
     boolean updateBlog(BlogRequest blog, User loginUser, Long id);
 
-    List<BlogVo> getBlogList(User loginUser);
+    List<BlogVO> getBlogList(User loginUser);
 
     boolean deleteBlog(User loginUser, Long id);
 
     boolean like(Long blogId, Long userId);
 
+    boolean isLike(Long blogId, Long userId);
+
     Blog getBlog(Long blogId, Long userId);
 
-    List<BlogVo> getMyBlog(Long userId);
+    List<BlogVO> getMyBlog(Long userId);
 }

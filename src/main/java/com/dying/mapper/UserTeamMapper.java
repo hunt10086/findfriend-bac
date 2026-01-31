@@ -1,7 +1,7 @@
 package com.dying.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dying.domain.UserTeam;
+import com.dying.domain.po.UserTeam;
 import org.apache.ibatis.annotations.Select;
 
 /**

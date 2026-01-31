@@ -3,6 +3,9 @@ package com.dying.exception;
 import com.dying.common.ErrorCode;
 import lombok.Data;
 
+/**
+ * @author daylight
+ */
 @Data
 public class BusinessException extends RuntimeException {
     private final int code;

@@ -1,8 +1,7 @@
 package com.dying;
 
-import cn.hutool.Hutool;
 import cn.hutool.core.lang.Validator;
-import com.dying.domain.User;
+import com.dying.domain.po.User;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import com.dying.utils.MD5Utils;

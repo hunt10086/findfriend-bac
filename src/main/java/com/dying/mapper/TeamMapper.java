@@ -1,7 +1,7 @@
 package com.dying.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dying.domain.Team;
+import com.dying.domain.po.Team;
 
 /**
 * @author 666

@@ -1,4 +1,4 @@
-package com.dying.domain.request;
+package com.dying.domain.dto;
 
 
 import lombok.AllArgsConstructor;

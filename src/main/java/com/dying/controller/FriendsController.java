@@ -3,14 +3,12 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.FriendRequests;
-import com.dying.domain.Friends;
-import com.dying.domain.User;
-import com.dying.domain.UserVo;
+import com.dying.domain.po.FriendRequests;
+import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.FriendsService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -68,13 +66,13 @@ public class FriendsController {
 
     @Operation(summary = "获取好友列表")
     @GetMapping("/list")
-    public BaseResponse<List<UserVo>> getFriendList(HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> getFriendList(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        List<UserVo> friendList = friendsService.getFriendList(request);
+        List<UserVO> friendList = friendsService.getFriendList(request);
         return ResultUtils.success(friendList);
     }
 
@@ -96,7 +94,7 @@ public class FriendsController {
 
     @Operation(summary = "检查是否为好友")
     @GetMapping("/check")
-    public BaseResponse<UserVo> checkFriend(@RequestParam Long friendUserId, HttpServletRequest request) {
+    public BaseResponse<UserVO> checkFriend(@RequestParam Long friendUserId, HttpServletRequest request) {
         if (friendUserId == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友ID不能为空");
         }
@@ -106,7 +104,7 @@ public class FriendsController {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        UserVo friend = friendsService.getFriends(request, friendUserId);
+        UserVO friend = friendsService.getFriends(request, friendUserId);
         return ResultUtils.success(friend);
     }
 }

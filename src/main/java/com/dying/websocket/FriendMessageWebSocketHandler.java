@@ -1,6 +1,7 @@
 package com.dying.websocket;
 
-import com.dying.domain.FriendMessages;
+import com.dying.domain.po.FriendMessages;
+import com.dying.domain.po.User;
 import com.dying.service.FriendMessagesService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpSession;
@@ -41,7 +42,7 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
         if (httpSession != null) {
             Object userObj = httpSession.getAttribute(USER_LOGIN_STATE);
             if (userObj != null) {
-                Long userId = ((com.dying.domain.User) userObj).getId();
+                Long userId = ((User) userObj).getId();
                 onlineUsers.put(userId, session);
                 System.out.println("用户 " + userId + " 已连接");
 
@@ -78,7 +79,7 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
                 return;
             }
 
-            Long senderId = ((com.dying.domain.User) userObj).getId();
+            Long senderId = ((User) userObj).getId();
             Long receiverId = messageDTO.getReceiverId();
             String content = messageDTO.getContent();
 

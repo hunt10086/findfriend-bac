@@ -3,12 +3,10 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.User;
-import com.dying.domain.UserTeam;
+import com.dying.domain.po.User;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserTeamService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.transform.Result;
 import java.util.List;
 
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;

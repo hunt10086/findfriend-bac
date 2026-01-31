@@ -1,6 +1,6 @@
 package com.dying.service;
 
-import com.dying.domain.FriendRequests;
+import com.dying.domain.po.FriendRequests;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 

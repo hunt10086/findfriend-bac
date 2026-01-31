@@ -1,9 +1,9 @@
 package com.dying.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.dying.domain.FriendRequests;
-import com.dying.domain.Friends;
-import com.dying.domain.UserVo;
+import com.dying.domain.po.FriendRequests;
+import com.dying.domain.po.Friends;
+import com.dying.domain.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -18,9 +18,9 @@ public interface FriendsService extends IService<Friends> {
 
     boolean disAgreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request);
 
-    UserVo getFriends(HttpServletRequest request, Long friendUserId);
+    UserVO getFriends(HttpServletRequest request, Long friendUserId);
 
-    List<UserVo> getFriendList(HttpServletRequest request);
+    List<UserVO> getFriendList(HttpServletRequest request);
 
     boolean deleteFriend(HttpServletRequest request, Long friendUserId);
 }

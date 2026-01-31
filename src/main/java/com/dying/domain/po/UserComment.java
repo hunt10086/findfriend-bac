@@ -1,4 +1,4 @@
-package com.dying.domain;
+package com.dying.domain.po;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;

@@ -1,6 +1,6 @@
 package com.dying.service.impl;
 
-import com.dying.domain.User;
+import com.dying.domain.po.User;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import jakarta.annotation.Resource;

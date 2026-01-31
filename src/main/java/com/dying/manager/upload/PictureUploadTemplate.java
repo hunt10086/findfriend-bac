@@ -1,24 +1,17 @@
 package com.dying.manager.upload;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.dying.common.ErrorCode;
 import com.dying.config.CosClientConfig;
 import com.dying.exception.BusinessException;
 import com.dying.manager.CosManager;
-import com.qcloud.cos.model.PutObjectResult;
-import com.qcloud.cos.model.ciModel.persistence.CIObject;
-import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
-import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 public abstract class PictureUploadTemplate {

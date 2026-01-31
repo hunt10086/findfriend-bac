@@ -3,8 +3,8 @@ package com.dying.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dying.domain.User;
-import com.dying.domain.UserTeam;
+import com.dying.domain.po.User;
+import com.dying.domain.po.UserTeam;
 import com.dying.mapper.UserMapper;
 import com.dying.mapper.UserTeamMapper;
 import com.dying.service.UserService;

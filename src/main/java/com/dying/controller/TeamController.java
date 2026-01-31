@@ -1,20 +1,18 @@
 package com.dying.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.Team;
-import com.dying.domain.User;
+import com.dying.domain.po.Team;
+import com.dying.domain.po.User;
 import com.dying.domain.request.CreateTeamRequest;
-import com.dying.domain.request.TeamDTO;
+import com.dying.domain.dto.TeamDTO;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.TeamMapper;
 import com.dying.service.TeamService;
 import com.dying.service.UserService;
 import com.dying.service.UserTeamService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

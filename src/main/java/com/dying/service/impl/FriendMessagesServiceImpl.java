@@ -3,7 +3,7 @@ package com.dying.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dying.domain.FriendMessages;
+import com.dying.domain.po.FriendMessages;
 import com.dying.mapper.FriendMessagesMapper;
 import com.dying.service.FriendMessagesService;
 import org.springframework.stereotype.Service;

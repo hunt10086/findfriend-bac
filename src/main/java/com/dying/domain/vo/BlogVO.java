@@ -1,28 +1,16 @@
-package com.dying.domain;
+package com.dying.domain.vo;
 
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.util.Date;
 
 /**
- * 博客文章
- * @TableName blog
+ * @Author daylight
+ * @Date 2025/7/18 17:00
  */
-
-@TableName(value ="blog")
 @Data
-public class Blog {
-    /**
-     * id
-     */
-    @TableId(type = IdType.AUTO)
+public class BlogVO {
     private Long id;
-
     /**
      * 标题
      */
@@ -49,12 +37,6 @@ public class Blog {
     private Date updateTime;
 
     /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDelete;
-
-    /**
      * 文章类型
      */
     private String kind;
@@ -63,4 +45,9 @@ public class Blog {
      * 文章获赞
      */
     private Integer praise;
+
+    /**
+     * 头像
+     */
+    private String avatarUrl;
 }

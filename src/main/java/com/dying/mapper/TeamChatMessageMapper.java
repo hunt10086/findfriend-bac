@@ -1,7 +1,7 @@
 package com.dying.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.dying.domain.TeamChatMessage;
+import com.dying.domain.po.TeamChatMessage;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

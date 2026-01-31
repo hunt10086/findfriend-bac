@@ -1,11 +1,10 @@
 package com.dying.service;
 
-import com.dying.domain.TeamChatMessage;
-import com.dying.domain.vo.TeamChatMessageVo;
+import com.dying.domain.vo.TeamChatMessageVO;
 
 import java.util.List;
 
 public interface TeamChatMessageService {
     boolean sendTeamChatMessage(Long userId, Long teamId, String content);
-    List<TeamChatMessageVo> getTeamChatMessages(Long teamId);
+    List<TeamChatMessageVO> getTeamChatMessages(Long teamId);
 } 

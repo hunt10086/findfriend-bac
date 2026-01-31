@@ -7,8 +7,8 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.constant.UserConstant;
-import com.dying.domain.User;
-import com.dying.domain.UserVo;
+import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.UserLoginRequest;
 import com.dying.domain.request.UserRegisterRequest;
 import com.dying.exception.BusinessException;
@@ -16,7 +16,6 @@ import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import com.dying.service.impl.emailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -242,12 +241,12 @@ public class  UserController {
 
     @Operation(summary = "附近用户")
     @GetMapping("/nearUser")
-    public BaseResponse<List<UserVo>> nearUser(HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> nearUser(HttpServletRequest request) {
         Long id=checkLogin(request);
         if(id==null||id<=0){
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
-        List<UserVo> list=userService.getNearUser(id);
+        List<UserVO> list=userService.getNearUser(id);
         return ResultUtils.success(list);
     }
 

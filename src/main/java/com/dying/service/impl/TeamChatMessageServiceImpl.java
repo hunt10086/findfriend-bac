@@ -1,10 +1,10 @@
 package com.dying.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.dying.domain.TeamChatMessage;
-import com.dying.domain.User;
-import com.dying.domain.UserTeam;
-import com.dying.domain.vo.TeamChatMessageVo;
+import com.dying.domain.po.TeamChatMessage;
+import com.dying.domain.po.User;
+import com.dying.domain.po.UserTeam;
+import com.dying.domain.vo.TeamChatMessageVO;
 import com.dying.mapper.TeamChatMessageMapper;
 import com.dying.mapper.UserMapper;
 import com.dying.mapper.UserTeamMapper;
@@ -48,13 +48,13 @@ public class TeamChatMessageServiceImpl implements TeamChatMessageService {
     }
 
     @Override
-    public List<TeamChatMessageVo> getTeamChatMessages(Long teamId) {
+    public List<TeamChatMessageVO> getTeamChatMessages(Long teamId) {
         List<TeamChatMessage> messageList = teamChatMessageMapper.selectList(
                 new QueryWrapper<TeamChatMessage>().eq("team_id", teamId).orderByAsc("create_time")
         );
-        List<TeamChatMessageVo> voList = new ArrayList<>();
+        List<TeamChatMessageVO> voList = new ArrayList<>();
         for (TeamChatMessage msg : messageList) {
-            TeamChatMessageVo vo = new TeamChatMessageVo();
+            TeamChatMessageVO vo = new TeamChatMessageVO();
             BeanUtils.copyProperties(msg, vo);
             User user = userMapper.selectById(msg.getUserId());
             vo.setUserName(user != null ? user.getUserName() : "");

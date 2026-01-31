@@ -4,10 +4,10 @@ import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
-import com.dying.domain.FriendRequests;
-import com.dying.domain.Friends;
-import com.dying.domain.User;
-import com.dying.domain.UserVo;
+import com.dying.domain.po.FriendRequests;
+import com.dying.domain.po.Friends;
+import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
 import com.dying.service.FriendRequestsService;
@@ -80,7 +80,7 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     }
 
     @Override
-    public UserVo getFriends(HttpServletRequest request, Long friendUserId) {
+    public UserVO getFriends(HttpServletRequest request, Long friendUserId) {
         User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
@@ -95,14 +95,14 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
         if (friendUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友不存在");
         } else {
-            UserVo userVo = new UserVo();
-            BeanUtil.copyProperties(friendUser, userVo);
-            return userVo;
+            UserVO userVO = new UserVO();
+            BeanUtil.copyProperties(friendUser, userVO);
+            return userVO;
         }
     }
 
     @Override
-    public List<UserVo> getFriendList(HttpServletRequest request) {
+    public List<UserVO> getFriendList(HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
@@ -116,9 +116,9 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
                     if (friendUser == null) {
                         return null;
                     }
-                    UserVo userVo = new UserVo();
-                    BeanUtil.copyProperties(friendUser, userVo);
-                    return userVo;
+                    UserVO userVO = new UserVO();
+                    BeanUtil.copyProperties(friendUser, userVO);
+                    return userVO;
                 })
                 .filter(Objects::nonNull)
                 .toList();

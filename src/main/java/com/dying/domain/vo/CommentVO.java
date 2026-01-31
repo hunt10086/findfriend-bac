@@ -1,6 +1,5 @@
-package com.dying.domain;
+package com.dying.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.util.Date;
@@ -10,7 +9,7 @@ import java.util.Date;
  * @Date 2025/7/18 11:44
  */
 @Data
-public class CommentVo {
+public class CommentVO {
     /**
      * 创建时间
      */

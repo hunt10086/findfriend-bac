@@ -3,9 +3,9 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.Blog;
-import com.dying.domain.BlogVo;
-import com.dying.domain.User;
+import com.dying.domain.po.Blog;
+import com.dying.domain.vo.BlogVO;
+import com.dying.domain.po.User;
 import com.dying.domain.request.BlogRequest;
 import com.dying.exception.BusinessException;
 import com.dying.service.BlogService;
@@ -70,7 +70,7 @@ public class BlogController {
 
     @Operation(summary = "获取博客列表")
     @GetMapping("/list")
-    public BaseResponse<List<BlogVo>> getBlogList(HttpServletRequest request) {
+    public BaseResponse<List<BlogVO>> getBlogList(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
@@ -109,6 +109,22 @@ public class BlogController {
         return ResultUtils.success(blogService.like(blogId, userId));
     }
 
+    @Operation(summary = "判断博客是否点赞")
+    @GetMapping("isLike")
+    public BaseResponse<Boolean> getBlogIsLike(Long blogId, HttpServletRequest request) {
+        Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) attribute;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
+        }
+        Long userId = currentUser.getId();
+        if (blogId == null || userId == null || userId < 0 || blogId < 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不正确");
+        }
+        return ResultUtils.success(blogService.isLike(blogId, userId));
+    }
+
+
     @Operation(summary = "获取单个博客")
     @GetMapping("/getOne")
     public BaseResponse<Blog> getBlog(Long blogId, HttpServletRequest request) {
@@ -126,14 +142,14 @@ public class BlogController {
 
     @Operation(summary = "获取我的博客列表")
     @GetMapping("/my/list")
-    public BaseResponse<List<BlogVo>> getMyBlogList(HttpServletRequest request) {
+    public BaseResponse<List<BlogVO>> getMyBlogList(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        List<BlogVo> list=blogService.getMyBlog(currentUser.getId());
-        if(list==null||list.size()==0){
+        List<BlogVO> list=blogService.getMyBlog(currentUser.getId());
+        if(list==null|| list.isEmpty()){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"没有发布过任何内容");
         }
         return ResultUtils.success(list);

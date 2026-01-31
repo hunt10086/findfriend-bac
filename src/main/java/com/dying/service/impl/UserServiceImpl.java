@@ -8,8 +8,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
-import com.dying.domain.User;
-import com.dying.domain.UserVo;
+import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.GeoService;
 import com.dying.service.UserService;
@@ -297,7 +297,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public List<UserVo> getNearUser(Long userId) {
+    public List<UserVO> getNearUser(Long userId) {
         User loginUser=userMapper.selectById(userId);
         double latitude = loginUser.getLatitude();
         double longitude=loginUser.getLongitude();
@@ -306,7 +306,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.isNotNull("longitude");
         queryWrapper.ne("id",userId);
         List<User> userList = userMapper.selectList(queryWrapper);
-        List<UserVo> list= new ArrayList<>();
+        List<UserVO> list= new ArrayList<>();
         int i=0;
         for(User user : userList){
             if(i>15){
@@ -316,11 +316,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             double latitude2 = user.getLatitude();
             double distance=getDistance(longitude,latitude,longitude2,latitude2);
             if(distance<1000){
-                UserVo userVo = new UserVo();
-                BeanUtils.copyProperties(user,userVo);
-                userVo.setDistance(distance);
+                UserVO userVO = new UserVO();
+                BeanUtils.copyProperties(user,userVO);
+                userVO.setDistance(distance);
                 i++;
-                list.add(userVo);
+                list.add(userVO);
             }
         }
         list.sort((o1, o2) -> Double.compare(o1.getDistance(), o2.getDistance()));

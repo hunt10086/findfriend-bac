@@ -21,6 +21,7 @@ public class BaseResponse<T> {
     BaseResponse(int code, T data,String message) {
         this(code,data,message,"");
     }
+
     BaseResponse(int code, T data) {
         this(code,data,"","");
     }
