@@ -52,47 +52,48 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private GeoService geoService;
 
     private static final String SALT = "Dying";
+
     @Override
-    public long userRegister(String userAccount, String password, String checkPassword,String email) {
+    public long userRegister(String userAccount, String password, String checkPassword, String email) {
         //账号密码不能为空
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(password)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号密码为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号密码为空");
         }
         if (StringUtils.isBlank(checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"第二次输入密码为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "第二次输入密码为空");
         }
-        if(StringUtils.isBlank(email)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"邮箱");
+        if (StringUtils.isBlank(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱");
         }
-        if(!RegexUtils.isEmailInvalid(email)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"邮箱格式错误");
+        if (!RegexUtils.isEmailInvalid(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式错误");
         }
         //账号大于四位
         if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号长度小于4");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号长度小于4");
         }
         //密码不小于八位
         if (password.length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码不小于八位");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码不小于八位");
         }
         //账号不能重复
         User flag = userMapper.findAllByUserAccountBoolean(userAccount);
 
-        if (flag!=null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号不能重复");
+        if (flag != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号不能重复");
         }
         //不允许出现特殊字符
         String regEx = "\\pP|\\pS|\\s+";
         String str = Pattern.compile(regEx).matcher(userAccount).replaceAll("").trim();
         if (!userAccount.equals(str)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"不允许出现特殊字符");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不允许出现特殊字符");
         }
 
-        if(!checkPassword.equals(password)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"两次密码不相同");
+        if (!checkPassword.equals(password)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码不相同");
         }
 
-        String  newpassword = MD5Utils.string2MD5(SALT + password + SALT);
+        String newpassword = MD5Utils.string2MD5(SALT + password + SALT);
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(newpassword);
@@ -114,35 +115,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public User userLogin(String userAccount, String password, HttpServletRequest request, Double latitude, Double longitude) {
         //账号密码不能为空
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(password)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号密码为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号密码为空");
         }
         //账号大于四位z
         if (userAccount.length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号大于四位");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号大于四位");
         }
         //密码不小于八位
         if (password.length() < 8) {
-          throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码小于八位");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码小于八位");
         }
         //不允许出现特殊字符
         String regEx = "\\pP|\\pS|\\s+";
         String str = Pattern.compile(regEx).matcher(userAccount).replaceAll("").trim();
         if (!userAccount.equals(str)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"不允许出现特殊字符");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不允许出现特殊字符");
         }
         //检验用户是否存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_account", userAccount).eq("user_password",MD5Utils.string2MD5(SALT+password+SALT));
+        queryWrapper.eq("user_account", userAccount).eq("user_password", MD5Utils.string2MD5(SALT + password + SALT));
         User user = userMapper.selectOne(queryWrapper);
-        if(user==null){
+        if (user == null) {
             log.info("用户或密码错误");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户或密码错误");
-        };
-        userMapper.updateById(user);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户或密码错误");
+        }
         //用户脱敏
-        User saftyUser=getSaftyUser(user);
+        User saftyUser = getSaftyUser(user);
         //记录用户登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE,saftyUser);
+        request.getSession().setAttribute(USER_LOGIN_STATE, saftyUser);
 
         // 缓存预热：预先生成第一页推荐
         backLike(saftyUser, 1);
@@ -152,7 +152,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public User getSaftyUser(User originUser) {
-        if(originUser==null){
+        if (originUser == null) {
             return null;
         }
         User saftyUser = new User();
@@ -163,6 +163,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         saftyUser.setGender(originUser.getGender());
         saftyUser.setPhone("");
         saftyUser.setEmail("");
+        saftyUser.setUserPassword("");
         saftyUser.setUserStatus(originUser.getUserStatus());
         saftyUser.setCreateTime(originUser.getCreateTime());
         saftyUser.setUserRole(originUser.getUserRole());
@@ -173,7 +174,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public boolean userUpdate(User user) {
-        if(user==null) {
+        if (user == null) {
             return false;
         }
         userMapper.updateById(user);
@@ -184,7 +185,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public int userLogout(HttpServletRequest request) {
-        if(request == null){
+        if (request == null) {
             return 0;
         }
         // 移除登录态
@@ -198,28 +199,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * sql 查询
      */
     @Override
-    public List<User> searchAllByTags(List<String> tagsList)    {
-        if(CollectionUtils.isEmpty(tagsList)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"标签列表为空");
+    public List<User> searchAllByTags(List<String> tagsList) {
+        if (CollectionUtils.isEmpty(tagsList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE+tagsList)!=null){
-            return JSONUtil.toList(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE+tagsList),User.class);
+        if (stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList) != null) {
+            return JSONUtil.toList(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList), User.class);
         }
         for (String tag : tagsList) {
-           queryWrapper=queryWrapper.like("tags",tag);
+            queryWrapper = queryWrapper.like("tags", tag);
         }
         List<User> userList = userMapper.selectList(queryWrapper);
-        List<User> list= userList.stream().map(this::getSaftyUser).collect(Collectors.toList());
-        stringRedisTemplate.opsForValue().set(USER_LIKE_STATE+tagsList,JSONUtil.toJsonStr(list),USER_REDIS_EXPIRE, TimeUnit.MINUTES);
-        return list;    }
+        List<User> list = userList.stream().map(this::getSaftyUser).collect(Collectors.toList());
+        stringRedisTemplate.opsForValue().set(USER_LIKE_STATE + tagsList, JSONUtil.toJsonStr(list), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
+        return list;
+    }
 
     @Override
-    public boolean checkEmail(String email){
-        if(StringUtils.isBlank(email)){
+    public boolean checkEmail(String email) {
+        if (StringUtils.isBlank(email)) {
             return false;
         }
-        if(!RegexUtils.isEmailInvalid(email)){
+        if (!RegexUtils.isEmailInvalid(email)) {
             return false;
         }
         return true;
@@ -260,23 +262,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         // 3. 计算相似度
         List<User> sortedUsers = allUsers.stream()
-            .peek(u -> {
-                List<String> tags;
-                try {
-                    tags = JSONUtil.toList(JSONUtil.parseArray(u.getTags()), String.class);
-                } catch (Exception e) {
-                    tags = new ArrayList<>();
-                }
-                int similarity = 0;
-                for (String tag : myTags) {
-                    if (tags.contains(tag)) {
-                        similarity++;
+                .peek(u -> {
+                    List<String> tags;
+                    try {
+                        tags = JSONUtil.toList(JSONUtil.parseArray(u.getTags()), String.class);
+                    } catch (Exception e) {
+                        tags = new ArrayList<>();
                     }
-                }
-                u.setUserStatus(similarity); // 临时存储相似度
-            })
-            .sorted((u1, u2) -> Integer.compare(u2.getUserStatus(), u1.getUserStatus()))
-            .collect(Collectors.toList());
+                    int similarity = 0;
+                    for (String tag : myTags) {
+                        if (tags.contains(tag)) {
+                            similarity++;
+                        }
+                    }
+                    u.setUserStatus(similarity); // 临时存储相似度
+                })
+                .sorted((u1, u2) -> Integer.compare(u2.getUserStatus(), u1.getUserStatus()))
+                .collect(Collectors.toList());
 
         // 4. 分页
         int pageSize = USER_PAGE_SIZE;
@@ -298,26 +300,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public List<UserVO> getNearUser(Long userId) {
-        User loginUser=userMapper.selectById(userId);
+        User loginUser = userMapper.selectById(userId);
         double latitude = loginUser.getLatitude();
-        double longitude=loginUser.getLongitude();
+        double longitude = loginUser.getLongitude();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNotNull("latitude");
         queryWrapper.isNotNull("longitude");
-        queryWrapper.ne("id",userId);
+        queryWrapper.ne("id", userId);
         List<User> userList = userMapper.selectList(queryWrapper);
-        List<UserVO> list= new ArrayList<>();
-        int i=0;
-        for(User user : userList){
-            if(i>15){
+        List<UserVO> list = new ArrayList<>();
+        int i = 0;
+        for (User user : userList) {
+            if (i > 15) {
                 break;
             }
             double longitude2 = user.getLongitude();
             double latitude2 = user.getLatitude();
-            double distance=getDistance(longitude,latitude,longitude2,latitude2);
-            if(distance<1000){
+            double distance = getDistance(longitude, latitude, longitude2, latitude2);
+            if (distance < 1000) {
                 UserVO userVO = new UserVO();
-                BeanUtils.copyProperties(user,userVO);
+                BeanUtils.copyProperties(user, userVO);
                 userVO.setDistance(distance);
                 i++;
                 list.add(userVO);
@@ -347,7 +349,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             currentPage = 1;
         }
         if (pageSize < 1) {
-            pageSize = 15; // 默认每页15条
+            // 默认每页15条
+            pageSize = 15;
         }
 
         // 生成缓存键：基于标签列表、页码和页面大小

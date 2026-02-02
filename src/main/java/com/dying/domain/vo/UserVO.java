@@ -28,11 +28,11 @@ public class UserVO {
      */
     private String tags;
 
-
     /**
      * 个人简介
      */
     private String profile;
+
     /**
      *  经度 纬度
      */

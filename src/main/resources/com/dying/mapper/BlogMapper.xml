@@ -5,19 +5,20 @@
 <mapper namespace="com.dying.mapper.BlogMapper">
 
     <resultMap id="BaseResultMap" type="com.dying.domain.po.Blog">
-            <id property="id" column="id" />
-            <result property="title" column="title" />
-            <result property="passage" column="passage" />
-            <result property="userId" column="user_id" />
-            <result property="createTime" column="create_time" />
-            <result property="updateTime" column="update_time" />
-            <result property="isDelete" column="is_delete" />
-            <result property="kind" column="kind" />
-            <result property="praise" column="praise" />
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="passage" column="passage"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="kind" column="kind"/>
+        <result property="status" column="status"/>
+        <result property="praise" column="praise"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,title,passage,user_id,create_time,update_time,
-        is_delete,kind,praise
+        is_delete,kind,praise,status
     </sql>
 </mapper>

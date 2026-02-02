@@ -1,5 +1,7 @@
 package com.dying.domain.po;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.util.Date;
@@ -15,6 +17,7 @@ public class UserComment {
     /**
      * 发表用户Id
      */
+    @TableId(type = IdType.AUTO)
     private Long userId;
 
     /**

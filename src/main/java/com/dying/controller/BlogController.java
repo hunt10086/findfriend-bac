@@ -1,5 +1,6 @@
 package com.dying.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
@@ -14,8 +15,6 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -42,6 +41,13 @@ public class BlogController {
         }
         if (blog == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "发表内容为空");
+        }
+        Integer status=blog.getStatus();
+        if(status==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数错误");
+        }
+        if(status!=0&&status!=1){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数错误");
         }
         if (blogService.createBlog(blog, currentUser)) {
             return ResultUtils.success("success");
@@ -70,13 +76,17 @@ public class BlogController {
 
     @Operation(summary = "获取博客列表")
     @GetMapping("/list")
-    public BaseResponse<List<BlogVO>> getBlogList(HttpServletRequest request) {
+    public BaseResponse<IPage<BlogVO>> getBlogList(HttpServletRequest request, Long currentPage) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        return ResultUtils.success(blogService.getBlogList(currentUser));
+        if(currentPage == null || currentPage < 1) {
+            // 默认第一页
+            currentPage = 1L;
+        }
+        return ResultUtils.success(blogService.getBlogList(currentUser, currentPage));
     }
 
     @Operation(summary = "删除博客")
@@ -142,14 +152,17 @@ public class BlogController {
 
     @Operation(summary = "获取我的博客列表")
     @GetMapping("/my/list")
-    public BaseResponse<List<BlogVO>> getMyBlogList(HttpServletRequest request) {
+    public BaseResponse<IPage<BlogVO>> getMyBlogList(HttpServletRequest request, Long currentPage) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        List<BlogVO> list=blogService.getMyBlog(currentUser.getId());
-        if(list==null|| list.isEmpty()){
+        if(currentPage == null || currentPage < 1) {
+            currentPage = 1L; // 默认第一页
+        }
+        com.baomidou.mybatisplus.core.metadata.IPage<BlogVO> list = blogService.getMyBlog(currentUser.getId(), currentPage);
+        if(list == null || list.getRecords().isEmpty()){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"没有发布过任何内容");
         }
         return ResultUtils.success(list);

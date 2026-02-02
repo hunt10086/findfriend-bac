@@ -14,7 +14,7 @@ import com.dying.domain.request.UserRegisterRequest;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
-import com.dying.service.impl.emailServiceImpl;
+import com.dying.service.impl.EmailServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
@@ -49,7 +49,7 @@ public class  UserController {
     private UserService userService;
 
     @Resource
-    private emailServiceImpl emailServiceImpl;
+    private EmailServiceImpl emailServiceImpl;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -107,7 +107,8 @@ public class  UserController {
         }
         long userId = currentUser.getId();
         User user = userService.getById(userId);
-        return ResultUtils.success(user);
+        User saftyUser = userService.getSaftyUser(user);
+        return ResultUtils.success(saftyUser);
     }
 
     @Operation(summary = "登录请求")
@@ -168,16 +169,6 @@ public class  UserController {
         User user1 = userService.getById(userId);
         List<User> list = new ArrayList<>();
         list.add(user1);
-        return ResultUtils.success(list);
-    }
-
-    @Operation(summary = "根据标签名查询用户")
-    @GetMapping("/search/tags")
-    public BaseResponse<List<User>> searchUsersByTags(@RequestParam (required = false) List<String> tagsList){
-        if(CollectionUtils.isEmpty(tagsList)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        List<User> list=userService.searchAllByTags(tagsList);
         return ResultUtils.success(list);
     }
 

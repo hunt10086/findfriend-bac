@@ -25,4 +25,13 @@ public class BlogRequest {
      * 文章类型
      */
     private String kind;
+    /**
+     * 状态
+     */
+    private Integer status;
+    /**
+     * Id
+     */
+    private Long id;
+
 }

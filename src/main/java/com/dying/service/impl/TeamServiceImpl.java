@@ -26,6 +26,9 @@ import java.util.Objects;
 import static com.dying.constant.TeamConstant.*;
 import static com.dying.constant.UserConstant.ADMIN_ROLE;
 
+/**
+ * @author daylight
+ */
 @Service
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         implements TeamService {

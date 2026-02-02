@@ -55,6 +55,11 @@ public class Blog {
     private Integer isDelete;
 
     /**
+     * 文章状态（1编辑中，0提交成功）
+     */
+    private Integer status;
+
+    /**
      * 文章类型
      */
     private String kind;

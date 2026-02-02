@@ -65,6 +65,4 @@ public class TeamDTO {
 
     private Long nowNum;
 
-
-
 }

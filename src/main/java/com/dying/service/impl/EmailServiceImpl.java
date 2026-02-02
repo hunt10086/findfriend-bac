@@ -14,7 +14,7 @@ import java.io.UnsupportedEncodingException;
  * @Author daylight
  */
 @Service
-public class emailServiceImpl {
+public class EmailServiceImpl {
     @Resource
     private JavaMailSender mailSender;
 

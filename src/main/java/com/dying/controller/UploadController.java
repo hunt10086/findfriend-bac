@@ -22,7 +22,7 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
 @Slf4j
 @RestController
-public class uploadController {
+public class UploadController {
 
 
     @Resource

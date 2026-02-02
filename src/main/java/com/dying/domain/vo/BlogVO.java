@@ -42,6 +42,11 @@ public class BlogVO {
     private String kind;
 
     /**
+     * 文章状态（1编辑中，0提交成功）
+     */
+    private Integer status;
+
+    /**
      * 文章获赞
      */
     private Integer praise;
