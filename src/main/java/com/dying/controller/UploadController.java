@@ -6,9 +6,7 @@ import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.User;
 import com.dying.exception.BusinessException;
-import com.dying.manager.CosManager;
 import com.dying.service.impl.FilePictureUpload;
-import com.qcloud.cos.COSClient;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,16 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
+/**
+ * @author daylight
+ */
 @Slf4j
 @RestController
 public class UploadController {
-
-
-    @Resource
-    private COSClient cosClient;
-
-    @Resource
-    private CosManager cosManager;
+    //TODO 不应该在controller中提供图片上传
 
     @Resource
     private FilePictureUpload filePictureUpload;

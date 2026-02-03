@@ -29,18 +29,11 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://www.seestars.top:9090", "http://localhost:9090"}, allowCredentials = "true")
 @Slf4j
 public class TeamController {
 
     @Resource
     private TeamService teamService;
-
-    @Resource
-    private UserService userService;
-
-    @Resource
-    private UserTeamService userTeamService;
 
     @Resource
     private TeamMapper teamMapper;

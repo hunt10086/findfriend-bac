@@ -18,12 +18,14 @@ import com.dying.utils.MD5Utils;
 import com.dying.utils.RegexUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -156,13 +158,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return null;
         }
         User saftyUser = new User();
+        saftyUser.setLatitude(originUser.getLatitude());
+        saftyUser.setLongitude(originUser.getLongitude());
         saftyUser.setId(originUser.getId());
         saftyUser.setUserName(originUser.getUserName());
         saftyUser.setUserAccount(originUser.getUserAccount());
         saftyUser.setAvatarUrl(originUser.getAvatarUrl());
         saftyUser.setGender(originUser.getGender());
         saftyUser.setPhone("");
-        saftyUser.setEmail("");
         saftyUser.setUserPassword("");
         saftyUser.setUserStatus(originUser.getUserStatus());
         saftyUser.setCreateTime(originUser.getCreateTime());
@@ -301,14 +304,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public List<UserVO> getNearUser(Long userId) {
         User loginUser = userMapper.selectById(userId);
-        double latitude = loginUser.getLatitude();
-        double longitude = loginUser.getLongitude();
+        if(loginUser==null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Double latitude = loginUser.getLatitude();
+        Double longitude = loginUser.getLongitude();
+        if(latitude==null||longitude==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"填写经纬度后开启附近用户搜索");
+        }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNotNull("latitude");
         queryWrapper.isNotNull("longitude");
         queryWrapper.ne("id", userId);
         List<User> userList = userMapper.selectList(queryWrapper);
         List<UserVO> list = new ArrayList<>();
+        if(userList.isEmpty()){
+            return list;
+        }
         int i = 0;
         for (User user : userList) {
             if (i > 15) {
@@ -325,7 +337,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 list.add(userVO);
             }
         }
-        list.sort((o1, o2) -> Double.compare(o1.getDistance(), o2.getDistance()));
+        list.sort(Comparator.comparingDouble(UserVO::getDistance));
         return list;
 
     }

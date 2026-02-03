@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * 文件图片上传实现类
  * 支持MultipartFile文件上传
+ * @author daylight
  */
 @Service
 public class FilePictureUpload extends PictureUploadTemplate {

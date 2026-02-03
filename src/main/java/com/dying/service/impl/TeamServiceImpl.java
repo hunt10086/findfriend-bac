@@ -40,6 +40,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     private UserTeamMapper userTeamMapper;
 
     @Override
+    @Transactional(rollbackFor = BusinessException.class)
     public boolean createTeam(CreateTeamRequest createTeamRequest, User loginUser) {
         // 1. 检验请求参数是否为空
         if (createTeamRequest == null) {
@@ -103,12 +104,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         //2. 返回所有队伍 不包含创建的和加入的
-        Long[] Ids = userTeamMapper.selectTeam(loginUser.getId());
-        if (Ids.length==0) {
+        Long[] ids = userTeamMapper.selectTeam(loginUser.getId());
+        if (ids.length==0) {
             return new ArrayList<>();
         }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id", (Object[]) Ids);
+        queryWrapper.in("id", (Object[]) ids);
         List<Team> teamList = teamMapper.selectList(queryWrapper);
         List<TeamDTO> teamDTOList = new ArrayList<>();
         for (Team team : teamList) {

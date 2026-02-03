@@ -2,10 +2,12 @@ package com.dying.exception;
 
 import com.dying.common.ErrorCode;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author daylight
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class BusinessException extends RuntimeException {
     private final int code;

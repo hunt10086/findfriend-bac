@@ -18,11 +18,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
+/**
+ * @author daylight
+ */
 @Component
 public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
 
     // 存储在线用户连接
-    private static final Map<Long, WebSocketSession> onlineUsers = new ConcurrentHashMap<>();
+    private static final Map<Long, WebSocketSession> ONLINE_USERS = new ConcurrentHashMap<>();
 
     private final FriendMessagesService friendMessagesService;
     private final ObjectMapper objectMapper;
@@ -43,7 +46,7 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
             Object userObj = httpSession.getAttribute(USER_LOGIN_STATE);
             if (userObj != null) {
                 Long userId = ((User) userObj).getId();
-                onlineUsers.put(userId, session);
+                ONLINE_USERS.put(userId, session);
                 System.out.println("用户 " + userId + " 已连接");
 
                 // 发送连接成功消息
@@ -96,13 +99,13 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
             friendMessage.setReceiverId(receiverId);
             friendMessage.setMessageContent(content);
             friendMessage.setSendTime(new Date());
-            friendMessage.setStatus(0); // 新消息默认为未读状态
-
+            // 新消息默认为未读状态
+            friendMessage.setStatus(0);
             // 构造返回给发送方的消息
             String responseMessage = objectMapper.writeValueAsString(friendMessage);
 
             // 尝试发送给接收者
-            WebSocketSession receiverSession = onlineUsers.get(receiverId);
+            WebSocketSession receiverSession = ONLINE_USERS.get(receiverId);
             if (receiverSession != null && receiverSession.isOpen()) {
                 // 接收者在线，直接发送消息
                 receiverSession.sendMessage(new TextMessage(responseMessage));
@@ -125,7 +128,7 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // 移除离线用户
-        onlineUsers.values().remove(session);
+        ONLINE_USERS.values().remove(session);
         System.out.println("WebSocket连接已关闭: " + status);
     }
 
@@ -138,14 +141,14 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
         if (session.isOpen()) {
             session.close(CloseStatus.SERVER_ERROR);
         }
-        onlineUsers.values().remove(session);
+        ONLINE_USERS.values().remove(session);
     }
 
     /**
      * 向指定用户发送消息
      */
     public static void sendMessageToUser(Long userId, String message) throws IOException {
-        WebSocketSession session = onlineUsers.get(userId);
+        WebSocketSession session = ONLINE_USERS.get(userId);
         if (session != null && session.isOpen()) {
             session.sendMessage(new TextMessage(message));
         }
@@ -155,7 +158,7 @@ public class FriendMessageWebSocketHandler extends TextWebSocketHandler {
      * 检查用户是否在线
      */
     public static boolean isUserOnline(Long userId) {
-        WebSocketSession session = onlineUsers.get(userId);
+        WebSocketSession session = ONLINE_USERS.get(userId);
         return session != null && session.isOpen();
     }
 }

@@ -213,7 +213,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求失败");
         }
 
-        Blog one = this.lambdaQuery().eq(Blog::getId, blogId).eq(Blog::getStatus, 0).one();
+        Blog one = this.lambdaQuery().eq(Blog::getId, blogId).one();
         ThrowUtils.throwIf(one==null,ErrorCode.PARAMS_ERROR,"错误,未找到资源");
         return one;
     }
