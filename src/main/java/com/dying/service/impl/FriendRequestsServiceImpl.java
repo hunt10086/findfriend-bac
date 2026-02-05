@@ -4,18 +4,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
 import com.dying.domain.po.FriendRequests;
 import com.dying.domain.po.Friends;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.FriendsMapper;
 import com.dying.service.FriendRequestsService;
 import com.dying.mapper.FriendRequestsMapper;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
-import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author daylight
@@ -30,12 +27,11 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
     private FriendsMapper friendsMapper;
 
     @Override
-    public boolean sendFriendRequest(Long friendUserId, HttpServletRequest request, String message) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+    public boolean sendFriendRequest(Long friendUserId, UserVO loginUser, String message) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         if (userId == null || friendUserId == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "id不能为空");
         }
@@ -57,12 +53,11 @@ public class FriendRequestsServiceImpl extends ServiceImpl<FriendRequestsMapper,
     }
 
     @Override
-    public List<FriendRequests> getFriendRequest(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+    public List<FriendRequests> getFriendRequest(UserVO loginUser) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         return this.lambdaQuery().eq(FriendRequests::getToUserId, userId).list();
     }
 

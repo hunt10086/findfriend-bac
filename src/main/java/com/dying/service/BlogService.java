@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dying.domain.po.Blog;
 import com.dying.domain.vo.BlogVO;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.BlogRequest;
 
 import java.util.List;
@@ -16,13 +16,13 @@ import java.util.List;
 */
 public interface BlogService extends IService<Blog> {
 
-    boolean createBlog(BlogRequest blog, User login);
+    boolean createBlog(BlogRequest blog, UserVO login);
 
-    boolean updateBlog(BlogRequest blog, User loginUser, Long id);
+    boolean updateBlog(BlogRequest blog, UserVO loginUser, Long id);
 
-    IPage<BlogVO> getBlogList(User loginUser, long currentPage);
+    IPage<BlogVO> getBlogList(UserVO loginUser, long currentPage);
 
-    boolean deleteBlog(User loginUser, Long id);
+    boolean deleteBlog(UserVO loginUser, Long id);
 
     boolean like(Long blogId, Long userId);
 

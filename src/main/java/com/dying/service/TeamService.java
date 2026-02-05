@@ -2,7 +2,7 @@ package com.dying.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dying.domain.po.Team;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.CreateTeamRequest;
 import com.dying.domain.vo.TeamVO;
 
@@ -16,25 +16,25 @@ import java.util.List;
 */
 public interface TeamService extends IService<Team> {
 
-    boolean createTeam(CreateTeamRequest createTeamRequest, User loginUser);
+    boolean createTeam(CreateTeamRequest createTeamRequest, UserVO loginUser);
 
-    List<TeamVO> getTeamList(User loginUser);
+    List<TeamVO> getTeamList(UserVO loginUser);
 
-    boolean updateTeam(Long id, User loginUser, TeamVO teamVO);
+    boolean updateTeam(Long id, UserVO loginUser, TeamVO teamVO);
 
-    boolean joinTeam(TeamVO teamVO, User loginUser, String password);
+    boolean joinTeam(TeamVO teamVO, UserVO loginUser, String password);
 
-    boolean quitTeam(TeamVO teamVO, User loginUser);
+    boolean quitTeam(TeamVO teamVO, UserVO loginUser);
 
-    boolean deleteTeam(TeamVO teamVO, User loginUser);
+    boolean deleteTeam(TeamVO teamVO, UserVO loginUser);
 
-    List<TeamVO> getMyTeam(User loginUser);
+    List<TeamVO> getMyTeam(UserVO loginUser);
 
-    List<TeamVO> getJoinTeam(User loginUser);
+    List<TeamVO> getJoinTeam(UserVO loginUser);
 
-    List<TeamVO> getTeams(User logonUser);
+    List<TeamVO> getTeams(UserVO logonUser);
 
-    List<TeamVO> searchTeam(String teamName, User loginUser);
+    List<TeamVO> searchTeam(String teamName, UserVO loginUser);
 
-    List<TeamVO> getOneTeam(Long id, User loginUser);
+    List<TeamVO> getOneTeam(Long id, UserVO loginUser);
 }

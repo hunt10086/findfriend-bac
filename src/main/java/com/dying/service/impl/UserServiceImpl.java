@@ -17,12 +17,12 @@ import com.dying.service.UserService;
 import com.dying.mapper.UserMapper;
 import com.dying.utils.MD5Utils;
 import com.dying.utils.RegexUtils;
+import com.dying.utils.UserRecommendationUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -178,7 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public boolean userUpdate(Long userId,UserUpdateRequest userUpdateRequest) {
+    public boolean userUpdate(Long userId, UserUpdateRequest userUpdateRequest) {
         if (userId == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
@@ -207,33 +207,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (StringUtils.isBlank(email)) {
             return false;
         }
-        if (!RegexUtils.isEmailInvalid(email)) {
-            return false;
-        }
-        return true;
+        return RegexUtils.isEmailInvalid(email);
     }
 
     @Override
     public List<UserVO> backLike(UserVO loginUser, Integer count) {
-        final List<String> myTags;
-        if (StringUtils.isBlank(loginUser.getTags())) {
-            myTags = new ArrayList<>();
-            myTags.add("Java");
-        } else {
-            List<String> tempTags;
-            try {
-                tempTags = JSONUtil.toList(JSONUtil.parseArray(loginUser.getTags()), String.class);
-            } catch (Exception e) {
-                tempTags = new ArrayList<>();
-            }
-            if (tempTags.isEmpty()) {
-                tempTags.add("Java");
-            }
-            myTags = tempTags;
+        // 验证参数
+        if (loginUser == null || loginUser.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户信息无效");
         }
 
+        if (count == null || count < 1) {
+            // 设置默认值
+            count = 1;
+        }
+
+        // 限制最大页码，防止恶意请求
+        // 限制最大页码为100
+        if (count > 100) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "页码过大");
+        }
+
+        // 从UserVO创建User对象以匹配工具类要求
+        User user = new User();
+        user.setId(loginUser.getId());
+        user.setTags(loginUser.getTags());
+
         // 1. Redis缓存优先
-        String cacheKey = USER_LIKE_STATE + ":" + loginUser.getId() + ":" + String.join(",", myTags) + ":" + count;
+        String tagsKey = loginUser.getTags() != null ? loginUser.getTags() : "";
+        String cacheKey = USER_LIKE_STATE + ":" + loginUser.getId() + ":" + tagsKey + ":" + count;
         String cacheValue = stringRedisTemplate.opsForValue().get(cacheKey);
         if (StringUtils.isNotBlank(cacheValue)) {
             return JSONUtil.toList(cacheValue, UserVO.class);
@@ -244,56 +246,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.ne("id", loginUser.getId());
         queryWrapper.isNotNull("tags");
         queryWrapper.ne("tags", "");
+        queryWrapper.eq("user_status", 0);
         List<User> allUsers = userMapper.selectList(queryWrapper);
 
-        // 3. 计算相似度
-        List<User> sortedUsers = allUsers.stream()
-                .peek(u -> {
-                    List<String> tags;
-                    try {
-                        tags = JSONUtil.toList(JSONUtil.parseArray(u.getTags()), String.class);
-                    } catch (Exception e) {
-                        tags = new ArrayList<>();
-                    }
-                    int similarity = 0;
-                    for (String tag : myTags) {
-                        if (tags.contains(tag)) {
-                            similarity++;
-                        }
-                    }
-                    u.setUserStatus(similarity); // 临时存储相似度
-                })
-                .sorted((u1, u2) -> Integer.compare(u2.getUserStatus(), u1.getUserStatus()))
-                .collect(Collectors.toList());
+        // 3. 使用推荐算法进行用户推荐
+        List<UserVO> recommendedUsers = UserRecommendationUtils.recommendUsers(user, allUsers);
 
-        // 4. 分页
+        // 4. 分页处理
         int pageSize = USER_PAGE_SIZE;
         int start = (count - 1) * pageSize;
-        int end = Math.min(start + pageSize, sortedUsers.size());
+        int end = Math.min(start + pageSize, recommendedUsers.size());
         if (start >= end) {
             return new ArrayList<>();
         }
-        List<User> result = sortedUsers.subList(start, end);
+        List<UserVO> result = recommendedUsers.subList(start, end);
 
-        // 5. 返回脱敏用户
-        List<UserVO> safeList = result.stream().map(this::getSafetyUser).collect(Collectors.toList());
+        // 5. 写入缓存
+        stringRedisTemplate.opsForValue().set(cacheKey, JSONUtil.toJsonStr(result), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
 
-        // 6. 写入缓存
-        stringRedisTemplate.opsForValue().set(cacheKey, JSONUtil.toJsonStr(safeList), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
-
-        return safeList;
+        return result;
     }
 
     @Override
     public List<UserVO> getNearUser(Long userId) {
         User loginUser = userMapper.selectById(userId);
-        if(loginUser==null){
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         Double latitude = loginUser.getLatitude();
         Double longitude = loginUser.getLongitude();
-        if(latitude==null||longitude==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"填写经纬度后开启附近用户搜索");
+        if (latitude == null || longitude == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "填写经纬度后开启附近用户搜索");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.isNotNull("latitude");
@@ -301,7 +284,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.ne("id", userId);
         List<User> userList = userMapper.selectList(queryWrapper);
         List<UserVO> list = new ArrayList<>();
-        if(userList.isEmpty()){
+        if (userList.isEmpty()) {
             return list;
         }
         int i = 0;

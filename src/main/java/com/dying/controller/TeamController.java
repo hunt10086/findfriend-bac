@@ -4,7 +4,7 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.Team;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.CreateTeamRequest;
 import com.dying.domain.vo.TeamVO;
 import com.dying.exception.BusinessException;
@@ -43,7 +43,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍参数为空");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -55,7 +55,7 @@ public class TeamController {
     @GetMapping("/list")
     public BaseResponse<List<TeamVO>> listTeam(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -70,7 +70,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"更新队伍参数为空");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -85,7 +85,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"加入队伍不存在");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -99,7 +99,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数为空");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -113,7 +113,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数为空");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -124,7 +124,7 @@ public class TeamController {
     @GetMapping("/myTeam")
     public BaseResponse<List<TeamVO>> getMyTeam(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -136,7 +136,7 @@ public class TeamController {
     @GetMapping("/joinTeam")
     public BaseResponse<List<TeamVO>> getJoinTeam(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -151,7 +151,7 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"队伍不存在");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -163,7 +163,7 @@ public class TeamController {
     @GetMapping("searchByID")
     public BaseResponse<Long> searchTeamByID(Long teamId,HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }
@@ -175,7 +175,7 @@ public class TeamController {
     @GetMapping("/get/team")
     public BaseResponse<List<TeamVO>> getTeam(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }

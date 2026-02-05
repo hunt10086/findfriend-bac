@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.dying.domain.po.FriendRequests;
 import com.dying.domain.po.Friends;
 import com.dying.domain.vo.UserVO;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -14,13 +13,13 @@ import java.util.List;
 * @createDate 2025-11-18 19:21:01
 */
 public interface FriendsService extends IService<Friends> {
-    boolean agreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request);
+    boolean agreeFriendRequest(FriendRequests friendRequests, UserVO loginUser);
 
-    boolean disAgreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request);
+    boolean disAgreeFriendRequest(FriendRequests friendRequests, UserVO loginUser);
 
-    UserVO getFriends(HttpServletRequest request, Long friendUserId);
+    UserVO getFriends(UserVO loginUser, Long friendUserId);
 
-    List<UserVO> getFriendList(HttpServletRequest request);
+    List<UserVO> getFriendList(UserVO loginUser);
 
-    boolean deleteFriend(HttpServletRequest request, Long friendUserId);
+    boolean deleteFriend(UserVO loginUser, Long friendUserId);
 }

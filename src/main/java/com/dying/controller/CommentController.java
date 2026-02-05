@@ -4,7 +4,7 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.vo.CommentVO;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.po.UserComment;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserCommentService;
@@ -37,7 +37,7 @@ public class CommentController {
     @GetMapping("/create")
     public BaseResponse<UserComment> create(String comment,Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -53,7 +53,7 @@ public class CommentController {
     @GetMapping("/list")
     public BaseResponse<List<CommentVO>> list(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }

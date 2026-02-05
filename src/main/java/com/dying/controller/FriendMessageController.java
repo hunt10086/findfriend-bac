@@ -3,7 +3,7 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.FriendMessages;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.FriendMessagesService;
@@ -38,7 +38,7 @@ public class FriendMessageController {
         if (userObj == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        User currentUser = (User) userObj;
+        UserVO currentUser = (UserVO) userObj;
         Long userId = currentUser.getId();
 
         // 获取聊天记录
@@ -64,7 +64,7 @@ public class FriendMessageController {
         if (userObj == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        User currentUser = (User) userObj;
+        UserVO currentUser = (UserVO) userObj;
         Long userId = currentUser.getId();
 
         // 获取未读消息数量
@@ -87,7 +87,7 @@ public class FriendMessageController {
         if (userObj == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        User currentUser = (User) userObj;
+        UserVO currentUser = (UserVO) userObj;
         Long userId = currentUser.getId();
 
         // 标记与指定好友的未读消息为已读

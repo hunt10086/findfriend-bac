@@ -6,13 +6,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
 import com.dying.domain.po.Team;
 import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.po.UserTeam;
 import com.dying.domain.request.CreateTeamRequest;
 import com.dying.domain.vo.TeamVO;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.TeamMapper;
+import com.dying.mapper.UserMapper;
 import com.dying.mapper.UserTeamMapper;
 import com.dying.service.TeamService;
+import com.dying.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -39,9 +42,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     @Resource
     private UserTeamMapper userTeamMapper;
 
+    @Resource
+    private UserMapper userMapper;
+
     @Override
     @Transactional(rollbackFor = BusinessException.class)
-    public boolean createTeam(CreateTeamRequest createTeamRequest, User loginUser) {
+    public boolean createTeam(CreateTeamRequest createTeamRequest, UserVO loginUser) {
         // 1. 检验请求参数是否为空
         if (createTeamRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -98,7 +104,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVO> getTeamList(User loginUser) {
+    public List<TeamVO> getTeamList(UserVO loginUser) {
         // 1. 检验用户登录态
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -126,7 +132,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public boolean updateTeam(Long id, User loginUser, TeamVO teamVO) {
+    public boolean updateTeam(Long id, UserVO loginUser, TeamVO teamVO) {
         // 1. 检验请求参数是否为空
         if (teamVO == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -138,7 +144,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         Team team = teamMapper.selectById(id);
         Long uId = team.getUserId();
         // 3.检验身份为队长或管理员
-        if (loginUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), uId)) {
+        // 通过ID查询数据库获取完整用户信息以判断权限
+        User fullUser = userMapper.selectById(loginUser.getId());
+        if (fullUser == null) {
+            throw new BusinessException(ErrorCode.NO_AUTO, "用户不存在");
+        }
+        if (fullUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), uId)) {
             throw new BusinessException(ErrorCode.NO_AUTO, "无权限");
         }
         // 4. 检验队伍名长度是否<=32
@@ -188,7 +199,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean joinTeam(TeamVO teamVO, User loginUser, String password) {
+    public boolean joinTeam(TeamVO teamVO, UserVO loginUser, String password) {
         // 1. 检验请求参数是否为空
         if (teamVO == null || teamVO.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -235,7 +246,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean quitTeam(TeamVO teamVO, User loginUser) {
+    public boolean quitTeam(TeamVO teamVO, UserVO loginUser) {
         // 1. 检查请求参数是否为空
         if (teamVO == null || teamVO.getId() <= 0) {
             return false;
@@ -249,7 +260,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
         Long id = loginUser.getId();
         queryWrapper.eq("team_id", teamVO.getId());
-        long count = userTeamMapper.selectCount(queryWrapper);//队伍人数
+        //队伍人数
+        long count = userTeamMapper.selectCount(queryWrapper);
         queryWrapper.eq("user_id", id);
         UserTeam userTeamI = userTeamMapper.selectOne(queryWrapper);
         long count1 = userTeamMapper.selectCount(queryWrapper);
@@ -281,13 +293,22 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteTeam(TeamVO teamVO, User loginUser) {
+    public boolean deleteTeam(TeamVO teamVO, UserVO loginUser) {
         // 1.检验请求参数是否为空
         if (teamVO == null || teamVO.getId() <= 0) {
             return false;
         }
         // 2.检验身份为队长或管理员
-        if (loginUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), teamVO.getUserId())) {
+        // 通过ID查询数据库获取完整用户信息以判断权限
+        User fullUser = userMapper.selectById(loginUser.getId());
+        Team team= teamMapper.selectById(teamVO.getId());
+        if(team==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (fullUser == null) {
+            throw new BusinessException(ErrorCode.NO_AUTO, "用户不存在");
+        }
+        if (fullUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), team.getUserId())) {
             throw new BusinessException(ErrorCode.NO_AUTO, "无权限");
         }
         // 3.删除相关成员信息
@@ -300,7 +321,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
 
     @Override
-    public List<TeamVO> getMyTeam(User loginUser) {
+    public List<TeamVO> getMyTeam(UserVO loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -322,7 +343,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVO> getJoinTeam(User loginUser) {
+    public List<TeamVO> getJoinTeam(UserVO loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -354,7 +375,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVO> getTeams(User loginUser) {
+    public List<TeamVO> getTeams(UserVO loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -380,7 +401,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVO> searchTeam(String teamName, User loginUser) {
+    public List<TeamVO> searchTeam(String teamName, UserVO loginUser) {
         if (loginUser == null || teamName == null) {
             return null;
         }
@@ -402,7 +423,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamVO> getOneTeam(Long teamId, User loginUser) {
+    public List<TeamVO> getOneTeam(Long teamId, UserVO loginUser) {
         if (teamId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍不存在");
         }

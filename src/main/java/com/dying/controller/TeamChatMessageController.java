@@ -2,7 +2,7 @@ package com.dying.controller;
 
 import com.dying.common.BaseResponse;
 import com.dying.common.ResultUtils;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.TeamChatMessageRequest;
 import com.dying.domain.vo.TeamChatMessageVO;
 import com.dying.exception.BusinessException;
@@ -28,7 +28,7 @@ public class TeamChatMessageController {
     @PostMapping("/send")
     public BaseResponse<Boolean> sendMessage(@RequestBody TeamChatMessageRequest request, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
         Object attribute = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -44,7 +44,7 @@ public class TeamChatMessageController {
     @GetMapping("/list")
     public BaseResponse<List<TeamChatMessageVO>> getMessageList(@RequestParam Long teamId, jakarta.servlet.http.HttpServletRequest httpServletRequest) {
         Object attribute = httpServletRequest.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -56,4 +56,4 @@ public class TeamChatMessageController {
         List<TeamChatMessageVO> list = teamChatMessageService.getTeamChatMessages(teamId);
         return ResultUtils.success(list);
     }
-} 
+}

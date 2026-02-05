@@ -21,6 +21,7 @@ public class FriendWebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(friendMessageWebSocketHandler, "/ws/friend")
                 .addInterceptors(friendHandshakeInterceptor)
-                .setAllowedOrigins("*"); // 根据实际情况设置允许的来源
+                // 根据实际情况设置允许的来源
+                .setAllowedOrigins("*");
     }
 }

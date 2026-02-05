@@ -6,7 +6,7 @@ import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.Blog;
 import com.dying.domain.vo.BlogVO;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.BlogRequest;
 import com.dying.exception.BusinessException;
 import com.dying.service.BlogService;
@@ -34,7 +34,7 @@ public class BlogController {
     @PostMapping("/create")
     public BaseResponse<String> createBlog(@RequestBody BlogRequest blog, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -59,7 +59,7 @@ public class BlogController {
     @PostMapping("/update")
     public BaseResponse<String> updateBlog(@RequestBody BlogRequest blog, HttpServletRequest request, Long id) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -77,7 +77,7 @@ public class BlogController {
     @GetMapping("/list")
     public BaseResponse<IPage<BlogVO>> getBlogList(HttpServletRequest request, Long currentPage) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -92,7 +92,7 @@ public class BlogController {
     @GetMapping("/delete")
     public BaseResponse<Boolean> deleteBlog(HttpServletRequest request, Long id) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -107,7 +107,7 @@ public class BlogController {
     @GetMapping("like")
     public BaseResponse<Boolean> getBlogLike(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -122,7 +122,7 @@ public class BlogController {
     @GetMapping("isLike")
     public BaseResponse<Boolean> getBlogIsLike(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -138,7 +138,7 @@ public class BlogController {
     @GetMapping("/getOne")
     public BaseResponse<Blog> getBlog(Long blogId, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -153,7 +153,7 @@ public class BlogController {
     @GetMapping("/my/list")
     public BaseResponse<IPage<BlogVO>> getMyBlogList(HttpServletRequest request, Long currentPage) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }

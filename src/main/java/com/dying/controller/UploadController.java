@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.impl.FilePictureUpload;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +38,7 @@ public class UploadController {
             @RequestPart("file") MultipartFile multipartFile,
             String type,
             HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }

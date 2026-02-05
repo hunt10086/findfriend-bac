@@ -3,7 +3,6 @@ package com.dying.controller;
 import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
-import com.dying.domain.po.User;
 import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserTeamService;
@@ -38,7 +37,7 @@ public class UserTeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"查询队伍不存在");
         }
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
         }

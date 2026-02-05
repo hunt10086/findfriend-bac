@@ -102,7 +102,7 @@ public class UserController {
     @GetMapping("/current")
     public BaseResponse<UserVO> getCurrentUser(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -160,7 +160,7 @@ public class UserController {
     @GetMapping("/searchOne")
     public BaseResponse<List<UserVO>> updateMassage(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
+        UserVO user = (UserVO) attribute;
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -194,7 +194,7 @@ public class UserController {
     @PostMapping("/update")
     public BaseResponse<Boolean> userUpdate(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user1 = (User) attribute;
+        UserVO user1 = (UserVO) attribute;
         if (user1 == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -221,7 +221,7 @@ public class UserController {
     @GetMapping("/listLike")
     public BaseResponse<List<UserVO>> userListLike(Integer count, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -246,7 +246,7 @@ public class UserController {
     @GetMapping("/search/one")
     public BaseResponse<UserVO> searchUserById(Long id, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser = (User) attribute;
+        UserVO currentUser = (UserVO) attribute;
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
@@ -261,16 +261,23 @@ public class UserController {
 
     public boolean isAdmin(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) attribute;
-        if (user == null || user.getUserRole() != UserConstant.ADMIN_ROLE) {
+        UserVO userVO = (UserVO) attribute;
+        if (userVO == null) {
             return false;
         }
-        return true;
+
+        // 通过ID查询数据库获取完整用户信息以判断权限
+        User user = userService.getById(userVO.getId());
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户不存在");
+        }
+
+        return user.getUserRole() == UserConstant.ADMIN_ROLE;
     }
 
     private Long checkLogin(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user1 = (User) attribute;
+        UserVO user1 = (UserVO) attribute;
         if (user1 == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }

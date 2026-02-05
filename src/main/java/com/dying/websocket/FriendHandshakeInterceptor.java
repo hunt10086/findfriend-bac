@@ -1,6 +1,6 @@
 package com.dying.websocket;
 
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.server.ServerHttpRequest;
@@ -35,7 +35,7 @@ public class FriendHandshakeInterceptor implements HandshakeInterceptor {
 
                 // 验证用户是否已登录
                 Object userObj = session.getAttribute(USER_LOGIN_STATE);
-                if (userObj instanceof User) {
+                if (userObj instanceof UserVO) {
                     // 允许建立连接
                     return true;
                 }

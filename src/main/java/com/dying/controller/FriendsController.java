@@ -4,7 +4,6 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.FriendRequests;
-import com.dying.domain.po.User;
 import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.FriendsService;
@@ -38,12 +37,12 @@ public class FriendsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        boolean result = friendsService.agreeFriendRequest(friendRequests, request);
+        boolean result = friendsService.agreeFriendRequest(friendRequests, user);
         return ResultUtils.success(result);
     }
 
@@ -54,24 +53,24 @@ public class FriendsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        boolean result = friendsService.disAgreeFriendRequest(friendRequests, request);
+        boolean result = friendsService.disAgreeFriendRequest(friendRequests, user);
         return ResultUtils.success(result);
     }
 
     @Operation(summary = "获取好友列表")
     @GetMapping("/list")
     public BaseResponse<List<UserVO>> getFriendList(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        List<UserVO> friendList = friendsService.getFriendList(request);
+        List<UserVO> friendList = friendsService.getFriendList(user);
         return ResultUtils.success(friendList);
     }
 
@@ -82,12 +81,12 @@ public class FriendsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友ID不能为空");
         }
 
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        boolean result = friendsService.deleteFriend(request, friendUserId);
+        boolean result = friendsService.deleteFriend(user, friendUserId);
         return ResultUtils.success(result);
     }
 
@@ -98,12 +97,12 @@ public class FriendsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友ID不能为空");
         }
 
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        UserVO friend = friendsService.getFriends(request, friendUserId);
+        UserVO friend = friendsService.getFriends(user, friendUserId);
         return ResultUtils.success(friend);
     }
 }

@@ -15,13 +15,10 @@ import com.dying.service.FriendsService;
 import com.dying.service.UserService;
 import com.dying.mapper.FriendsMapper;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-
-import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author daylight
@@ -42,13 +39,12 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     private UserService userService;
 
     @Override
-    public boolean agreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request) {
+    public boolean agreeFriendRequest(FriendRequests friendRequests, UserVO loginUser) {
         Long requestId = friendRequests.getId();
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         FriendRequests friendRequest = friendRequestsService.getById(requestId);
         if (friendRequest == null || !friendRequest.getToUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友请求不存在或无权限操作");
@@ -68,13 +64,12 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     }
 
     @Override
-    public boolean disAgreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request) {
+    public boolean disAgreeFriendRequest(FriendRequests friendRequests, UserVO loginUser) {
         Long requestId = friendRequests.getId();
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         FriendRequests friendRequest = friendRequestsService.getById(requestId);
         if (friendRequest == null || !friendRequest.getToUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友请求不存在或无权限操作");
@@ -84,12 +79,11 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     }
 
     @Override
-    public UserVO getFriends(HttpServletRequest request, Long friendUserId) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+    public UserVO getFriends(UserVO loginUser, Long friendUserId) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         QueryWrapper<Friends> queryWrapper = new QueryWrapper<>();
         QueryWrapper<Friends> eq = queryWrapper.eq("user_id", userId)
                 .eq("friend_id", friendUserId)
@@ -104,12 +98,11 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     }
 
     @Override
-    public List<UserVO> getFriendList(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+    public List<UserVO> getFriendList(UserVO loginUser) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         QueryWrapper<Friends> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId).eq("status", 1);
         return this.list(queryWrapper).stream()
@@ -125,12 +118,11 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
     }
 
     @Override
-    public boolean deleteFriend(HttpServletRequest request, Long friendUserId) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
-        if (user == null) {
+    public boolean deleteFriend(UserVO loginUser, Long friendUserId) {
+        if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        Long userId = user.getId();
+        Long userId = loginUser.getId();
         QueryWrapper<Friends> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
                 .eq("friend_id", friendUserId)

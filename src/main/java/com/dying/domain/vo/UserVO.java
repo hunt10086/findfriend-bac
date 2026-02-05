@@ -1,8 +1,8 @@
 package com.dying.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +10,7 @@ import java.util.Date;
  * @Date 2025/7/13 23:02
  */
 @Data
-public class UserVO {
+public class UserVO implements Serializable {
 
     private Long id;
     /**
@@ -41,7 +41,6 @@ public class UserVO {
      * 邮箱
      */
     private String email;
-
 
     /**
      * 创建时间

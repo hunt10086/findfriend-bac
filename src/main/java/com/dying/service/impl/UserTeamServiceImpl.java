@@ -3,7 +3,6 @@ package com.dying.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.dying.domain.po.User;
 import com.dying.domain.po.UserTeam;
 import com.dying.domain.vo.UserVO;
 import com.dying.mapper.UserMapper;
@@ -35,7 +34,7 @@ public class UserTeamServiceImpl extends ServiceImpl<UserTeamMapper, UserTeam>
     private UserService userService;
 
     @Override
-    public List<UserVO> getTeamPeople(Long teamId, User loginUser){
+    public List<UserVO> getTeamPeople(Long teamId, UserVO loginUser){
         if(loginUser==null||loginUser.getId()==null||loginUser.getId()<=0||teamId<=0){
             return  null;
         }

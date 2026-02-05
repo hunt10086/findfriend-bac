@@ -9,8 +9,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
 import com.dying.domain.po.Blog;
-import com.dying.domain.vo.BlogVO;
 import com.dying.domain.po.User;
+import com.dying.domain.vo.BlogVO;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.BlogRequest;
 import com.dying.exception.BusinessException;
 import com.dying.exception.ThrowUtils;
@@ -50,7 +51,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     private UserMapper userMapper;
 
     @Override
-    public boolean createBlog(BlogRequest blogRequest, User loginUser) {
+    public boolean createBlog(BlogRequest blogRequest, UserVO loginUser) {
         // 1.检验返回值为空  是否登录
         if (loginUser == null || loginUser.getId() == null || blogRequest == null || loginUser.getId() < 0) {
             return false;
@@ -97,7 +98,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public boolean updateBlog(BlogRequest blogRequest, User loginUser, Long id) {
+    public boolean updateBlog(BlogRequest blogRequest, UserVO loginUser, Long id) {
         Blog blog1 = blogMapper.selectById(id);
         if (blog1 == null) {
             return false;
@@ -123,7 +124,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public IPage<BlogVO> getBlogList(User loginUser, long currentPage) {
+    public IPage<BlogVO> getBlogList(UserVO loginUser, long currentPage) {
         if (loginUser == null || loginUser.getId() == null || loginUser.getId() < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -155,7 +156,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public boolean deleteBlog(User loginUser, Long id) {
+    public boolean deleteBlog(UserVO loginUser, Long id) {
         if (loginUser == null || loginUser.getId() == null || loginUser.getId() < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }

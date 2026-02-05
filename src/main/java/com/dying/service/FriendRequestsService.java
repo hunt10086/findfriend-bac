@@ -1,8 +1,8 @@
 package com.dying.service;
 
 import com.dying.domain.po.FriendRequests;
+import com.dying.domain.vo.UserVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
 */
 public interface FriendRequestsService extends IService<FriendRequests> {
 
-    boolean sendFriendRequest(Long friendUserId, HttpServletRequest request, String message);
+    boolean sendFriendRequest(Long friendUserId, UserVO loginUser, String message);
 
-    List<FriendRequests> getFriendRequest(HttpServletRequest request);
+    List<FriendRequests> getFriendRequest(UserVO loginUser);
 }

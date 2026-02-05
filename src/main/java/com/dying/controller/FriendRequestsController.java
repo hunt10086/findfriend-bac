@@ -4,7 +4,7 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.FriendRequests;
-import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.FriendRequestsRequest;
 import com.dying.exception.BusinessException;
 import com.dying.service.FriendRequestsService;
@@ -38,14 +38,14 @@ public class FriendRequestsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
         boolean result = friendRequestsService.sendFriendRequest(
                 friendRequestsRequest.getFriendUserId(),
-                request,
+                user,
                 friendRequestsRequest.getMessage()
         );
         return ResultUtils.success(result);
@@ -54,12 +54,12 @@ public class FriendRequestsController {
     @Operation(summary = "获取好友申请列表")
     @GetMapping("/list")
     public BaseResponse<List<FriendRequests>> getFriendRequests(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        UserVO user = (UserVO) request.getSession().getAttribute(USER_LOGIN_STATE);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
 
-        List<FriendRequests> friendRequests = friendRequestsService.getFriendRequest(request);
+        List<FriendRequests> friendRequests = friendRequestsService.getFriendRequest(user);
         return ResultUtils.success(friendRequests);
     }
 }
