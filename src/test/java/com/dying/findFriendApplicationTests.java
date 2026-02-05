@@ -2,6 +2,7 @@ package com.dying;
 
 import cn.hutool.core.lang.Validator;
 import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import com.dying.utils.MD5Utils;
@@ -28,8 +29,8 @@ class findFriendApplicationTests {
         List<String> tags = new ArrayList<>();
         tags.add("java");
         tags.add("python");
-        List<User> list= userService.searchAllByTags(tags);
-        for(User user:list){
+        List<UserVO> list= userService.searchAllByTags(tags);
+        for(UserVO user:list){
             System.out.println(user.toString());
         }
     }

@@ -2,6 +2,7 @@ package com.dying.service;
 
 import com.dying.domain.po.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.dying.domain.request.UserUpdateRequest;
 import com.dying.domain.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -17,19 +18,19 @@ public interface UserService extends IService<User> {
 
     long userRegister(String userAccount, String password,String checkPassword,String email);
 
-    User userLogin(String userAccount, String password, HttpServletRequest request,Double latitude, Double longitude);
+    UserVO userLogin(String userAccount, String password, HttpServletRequest request);
 
-    User getSaftyUser(User originUser);
+    UserVO getSafetyUser(User originUser);
 
     int userLogout(HttpServletRequest request);
 
-    boolean userUpdate(User user);
+    boolean userUpdate(Long userId,UserUpdateRequest userUpdateRequest);
 
-    List<User> searchAllByTags(List<String> tagsList);
+    List<UserVO> searchAllByTags(List<String> tagsList);
 
     boolean checkEmail(String email);
 
-    List<User> backLike(User loginUser,Integer count);
+    List<UserVO> backLike(UserVO loginUser,Integer count);
 
     List<UserVO> getNearUser(Long userId);
 
@@ -40,5 +41,5 @@ public interface UserService extends IService<User> {
      * @param pageSize 每页大小
      * @return 分页用户列表
      */
-    IPage<User> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize);
+    IPage<UserVO> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize);
 }

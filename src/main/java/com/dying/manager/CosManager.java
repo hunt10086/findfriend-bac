@@ -4,10 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import com.dying.config.CosClientConfig;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.exception.CosClientException;
-import com.qcloud.cos.model.COSObject;
-import com.qcloud.cos.model.GetObjectRequest;
-import com.qcloud.cos.model.PutObjectRequest;
-import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.exception.CosServiceException;
+import com.qcloud.cos.model.*;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -16,6 +14,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author daylight
+ */
 @Component
 public class CosManager {
 
@@ -77,6 +78,35 @@ public class CosManager {
      */
     public void deleteObject(String key) throws CosClientException {
         cosClient.deleteObject(cosClientConfig.getBucket(), key);
+    }
+
+    public List<String> listObjectKeys() {
+        List<String> keys = new ArrayList<>();
+        ObjectListing objectListing;
+        try {
+            objectListing = cosClient.listObjects(cosClientConfig.getBucket());
+        } catch (CosServiceException e) {
+            e.printStackTrace();
+            return null;
+        } catch (CosClientException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        // 这里保存列出来的子目录
+        List<String> commonPrefixes = objectListing.getCommonPrefixes();
+        for (String commonPrefix : commonPrefixes) {
+            System.out.println(commonPrefix);
+        }
+        // 这里保存列出的对象列表
+        List<COSObjectSummary> cosObjectSummaries = objectListing.getObjectSummaries();
+        for (COSObjectSummary cosObjectSummary : cosObjectSummaries) {
+            // 对象的 key
+            String key = cosObjectSummary.getKey();
+            keys.add(key);
+        }
+        return keys;
+
     }
 
 

@@ -49,7 +49,6 @@ public abstract class PictureUploadTemplate {
             // 禁用SSL证书验证
             // 4. 上传图片到对象存储  
             cosManager.putPictureObject(uploadPath, file);
-            //String originalUrl=cosClientConfig.getHost()+"/"+uploadPath;
             return cosClientConfig.getHost()+uploadPath;
         } catch (Exception e) {
             log.error("图片上传到对象存储失败", e);

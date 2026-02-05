@@ -9,6 +9,7 @@ import com.dying.exception.BusinessException;
 import com.dying.common.ErrorCode;
 import com.dying.service.TeamChatMessageService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 @RestController
 @RequestMapping("/api/teamChat")
 public class TeamChatMessageController {
-    @Autowired
+    @Resource
     private TeamChatMessageService teamChatMessageService;
 
     // 发送消息

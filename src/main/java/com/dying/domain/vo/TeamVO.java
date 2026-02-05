@@ -1,4 +1,4 @@
-package com.dying.domain.dto;
+package com.dying.domain.vo;
 
 
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeamDTO {
+public class TeamVO {
 
     private Long id;
     /**

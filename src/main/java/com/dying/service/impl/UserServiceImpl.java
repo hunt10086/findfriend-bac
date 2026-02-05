@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
 import com.dying.domain.po.User;
+import com.dying.domain.request.UserUpdateRequest;
 import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.GeoService;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -114,7 +116,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User userLogin(String userAccount, String password, HttpServletRequest request, Double latitude, Double longitude) {
+    public UserVO userLogin(String userAccount, String password, HttpServletRequest request) {
         //账号密码不能为空
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(password)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号密码为空");
@@ -142,47 +144,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户或密码错误");
         }
         //用户脱敏
-        User saftyUser = getSaftyUser(user);
+        UserVO safetyUser = getSafetyUser(user);
         //记录用户登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE, saftyUser);
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
 
         // 缓存预热：预先生成第一页推荐
-        backLike(saftyUser, 1);
+        backLike(safetyUser, 1);
 
-        return saftyUser;
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
     }
 
     @Override
-    public User getSaftyUser(User originUser) {
+    public UserVO getSafetyUser(User originUser) {
         if (originUser == null) {
             return null;
         }
-        User saftyUser = new User();
-        saftyUser.setLatitude(originUser.getLatitude());
-        saftyUser.setLongitude(originUser.getLongitude());
-        saftyUser.setId(originUser.getId());
-        saftyUser.setUserName(originUser.getUserName());
-        saftyUser.setUserAccount(originUser.getUserAccount());
-        saftyUser.setAvatarUrl(originUser.getAvatarUrl());
-        saftyUser.setGender(originUser.getGender());
-        saftyUser.setPhone("");
-        saftyUser.setUserPassword("");
-        saftyUser.setUserStatus(originUser.getUserStatus());
-        saftyUser.setCreateTime(originUser.getCreateTime());
-        saftyUser.setUserRole(originUser.getUserRole());
-        saftyUser.setTags(originUser.getTags());
-        saftyUser.setProfile(originUser.getProfile());
-        return saftyUser;
+        UserVO safetyUser = new UserVO();
+        BeanUtils.copyProperties(originUser, safetyUser);
+        return safetyUser;
     }
 
     @Override
-    public boolean userUpdate(User user) {
-        if (user == null) {
-            return false;
+    public boolean userUpdate(Long userId,UserUpdateRequest userUpdateRequest) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
+        User user = new User();
+        user.setId(userId);
+        BeanUtils.copyProperties(userUpdateRequest, user);
         userMapper.updateById(user);
+        UserVO safetyUser = getSafetyUser(user);
         // 缓存预热：预先生成第一页推荐
-        backLike(user, 1);
+        backLike(safetyUser, 1);
         return true;
     }
 
@@ -202,19 +197,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * sql 查询
      */
     @Override
-    public List<User> searchAllByTags(List<String> tagsList) {
+    public List<UserVO> searchAllByTags(List<String> tagsList) {
         if (CollectionUtils.isEmpty(tagsList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList) != null) {
-            return JSONUtil.toList(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList), User.class);
+            return JSONUtil.toList(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList), UserVO.class);
         }
         for (String tag : tagsList) {
             queryWrapper = queryWrapper.like("tags", tag);
         }
         List<User> userList = userMapper.selectList(queryWrapper);
-        List<User> list = userList.stream().map(this::getSaftyUser).collect(Collectors.toList());
+        List<UserVO> list = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
         stringRedisTemplate.opsForValue().set(USER_LIKE_STATE + tagsList, JSONUtil.toJsonStr(list), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
         return list;
     }
@@ -231,7 +226,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public List<User> backLike(User loginUser, Integer count) {
+    public List<UserVO> backLike(UserVO loginUser, Integer count) {
         final List<String> myTags;
         if (StringUtils.isBlank(loginUser.getTags())) {
             myTags = new ArrayList<>();
@@ -253,7 +248,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String cacheKey = USER_LIKE_STATE + ":" + loginUser.getId() + ":" + String.join(",", myTags) + ":" + count;
         String cacheValue = stringRedisTemplate.opsForValue().get(cacheKey);
         if (StringUtils.isNotBlank(cacheValue)) {
-            return JSONUtil.toList(cacheValue, User.class);
+            return JSONUtil.toList(cacheValue, UserVO.class);
         }
 
         // 2. 查询所有其他用户，且tags不为空
@@ -293,7 +288,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         List<User> result = sortedUsers.subList(start, end);
 
         // 5. 返回脱敏用户
-        List<User> safeList = result.stream().map(this::getSaftyUser).collect(Collectors.toList());
+        List<UserVO> safeList = result.stream().map(this::getSafetyUser).collect(Collectors.toList());
 
         // 6. 写入缓存
         stringRedisTemplate.opsForValue().set(cacheKey, JSONUtil.toJsonStr(safeList), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
@@ -352,7 +347,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public IPage<User> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize) {
+    public IPage<UserVO> searchUsersByTagsWithPagination(List<String> tagsList, long currentPage, long pageSize) {
         // 参数校验
         if (CollectionUtils.isEmpty(tagsList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表不能为空");
@@ -374,7 +369,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (StringUtils.isNotBlank(cachedResult)) {
             try {
                 // 从缓存中获取分页信息
-                IPage<User> cachedPage = JSONUtil.toBean(cachedResult, Page.class);
+                IPage<UserVO> cachedPage = JSONUtil.toBean(cachedResult, Page.class);
                 log.info("从Redis缓存中获取标签查询结果，标签：{}，页码：{}", tagsKey, currentPage);
                 return cachedPage;
             } catch (Exception e) {
@@ -400,8 +395,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         IPage<User> userPage = userMapper.selectPage(page, queryWrapper);
 
         // 对查询结果进行脱敏处理
-        List<User> safeUsers = userPage.getRecords().stream()
-                .map(this::getSaftyUser)
+        List<UserVO> safeUsers = userPage.getRecords().stream()
+                .map(this::getSafetyUser)
                 .collect(Collectors.toList());
 
         userPage.setRecords(safeUsers);

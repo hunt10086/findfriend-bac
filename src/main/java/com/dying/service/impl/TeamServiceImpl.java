@@ -8,7 +8,7 @@ import com.dying.domain.po.Team;
 import com.dying.domain.po.User;
 import com.dying.domain.po.UserTeam;
 import com.dying.domain.request.CreateTeamRequest;
-import com.dying.domain.dto.TeamDTO;
+import com.dying.domain.vo.TeamVO;
 import com.dying.exception.BusinessException;
 import com.dying.mapper.TeamMapper;
 import com.dying.mapper.UserTeamMapper;
@@ -98,7 +98,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamDTO> getTeamList(User loginUser) {
+    public List<TeamVO> getTeamList(User loginUser) {
         // 1. 检验用户登录态
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -111,24 +111,24 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.in("id", (Object[]) ids);
         List<Team> teamList = teamMapper.selectList(queryWrapper);
-        List<TeamDTO> teamDTOList = new ArrayList<>();
+        List<TeamVO> teamVOList = new ArrayList<>();
         for (Team team : teamList) {
-            TeamDTO teamDTO = new TeamDTO();
-            BeanUtils.copyProperties(team, teamDTO);
-            teamDTO.setPassword("");
+            TeamVO teamVO = new TeamVO();
+            BeanUtils.copyProperties(team, teamVO);
+            teamVO.setPassword("");
             QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-            userTeamQueryWrapper.eq("team_id", teamDTO.getId());
+            userTeamQueryWrapper.eq("team_id", teamVO.getId());
             Long l = userTeamMapper.selectCount(userTeamQueryWrapper);
-            teamDTO.setNowNum(l);
-            teamDTOList.add(teamDTO);
+            teamVO.setNowNum(l);
+            teamVOList.add(teamVO);
         }
-        return teamDTOList;
+        return teamVOList;
     }
 
     @Override
-    public boolean updateTeam(Long id, User loginUser, TeamDTO teamDto) {
+    public boolean updateTeam(Long id, User loginUser, TeamVO teamVO) {
         // 1. 检验请求参数是否为空
-        if (teamDto == null || id <= 0) {
+        if (teamVO == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         // 2. 检验用户登录态
@@ -142,12 +142,12 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.NO_AUTO, "无权限");
         }
         // 4. 检验队伍名长度是否<=32
-        String teamName = teamDto.getTeamName();
-        String description = teamDto.getDescription();
-        String password = teamDto.getPassword();
-        int status = teamDto.getStatus();
-        int maxNum = teamDto.getMaxNum();
-        String icon = teamDto.getIcon();
+        String teamName = teamVO.getTeamName();
+        String description = teamVO.getDescription();
+        String password = teamVO.getPassword();
+        int status = teamVO.getStatus();
+        int maxNum = teamVO.getMaxNum();
+        String icon = teamVO.getIcon();
         if (StringUtils.isBlank(teamName) || teamName.length() > TEAM_MAX_NAME_LENGTH) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
@@ -172,7 +172,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if (teamName.equals(team.getTeamName()) && description.equals(team.getDescription())
                 && status == team.getStatus() && maxNum == team.getMaxNum() && icon.equals(team.getIcon())) {
             if (status == 1) {
-                if (password.equals(teamDto.getPassword())) {
+                if (password.equals(teamVO.getPassword())) {
                     return true;
                 }
             }
@@ -180,7 +180,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         // 9.更新
         Team team1 = new Team();
-        BeanUtils.copyProperties(teamDto, team1);
+        BeanUtils.copyProperties(teamVO, team1);
         team.setUpdateTime(new Date());
         int i = teamMapper.updateById(team1);
         return i == 1;
@@ -188,16 +188,16 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean joinTeam(TeamDTO teamDTO, User loginUser, String password) {
+    public boolean joinTeam(TeamVO teamVO, User loginUser, String password) {
         // 1. 检验请求参数是否为空
-        if (teamDTO == null || teamDTO.getId() <= 0) {
+        if (teamVO == null || teamVO.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         // 2. 检验用户登录态
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        Team team = teamMapper.selectById(teamDTO.getId());
+        Team team = teamMapper.selectById(teamVO.getId());
         // 3.不能加入自己的队伍
         if (Objects.equals(loginUser.getId(), team.getUserId())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能加入自己的队伍");
@@ -207,7 +207,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         queryWrapper.eq("user_id", loginUser.getId());
         List<UserTeam> userTeams = userTeamMapper.selectList(queryWrapper);
         for (UserTeam userTeam : userTeams) {
-            if (Objects.equals(userTeam.getTeamId(), teamDTO.getId())) {
+            if (Objects.equals(userTeam.getTeamId(), teamVO.getId())) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能重复加入该队伍");
             }
         }
@@ -217,27 +217,27 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         // 5.人数满了也不能加入
         QueryWrapper<UserTeam> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper1.eq("team_id", teamDTO.getId());
+        queryWrapper1.eq("team_id", teamVO.getId());
         long count = userTeamMapper.selectCount(queryWrapper1);
-        if (count >= teamDTO.getMaxNum()) {
+        if (count >= teamVO.getMaxNum()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍人数已满");
         }
         // 6.插入数据
         UserTeam userTeam = new UserTeam();
-        userTeam.setTeamId(teamDTO.getId());
+        userTeam.setTeamId(teamVO.getId());
         userTeam.setUserId(loginUser.getId());
         userTeam.setJoinTime(new Date());
-        userTeam.setUpdateTime(teamDTO.getUpdateTime());
-        userTeam.setCreateTime(teamDTO.getCreateTime());
+        userTeam.setUpdateTime(teamVO.getUpdateTime());
+        userTeam.setCreateTime(teamVO.getCreateTime());
         int i = userTeamMapper.insert(userTeam);
         return i == 1;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean quitTeam(TeamDTO teamDTO, User loginUser) {
+    public boolean quitTeam(TeamVO teamVO, User loginUser) {
         // 1. 检查请求参数是否为空
-        if (teamDTO == null || teamDTO.getId() <= 0) {
+        if (teamVO == null || teamVO.getId() <= 0) {
             return false;
         }
         // 2. 检验用户登录态
@@ -245,10 +245,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             return false;
         }
         // 3. 检验是否入队
-        Team team = teamMapper.selectById(teamDTO.getId());
+        Team team = teamMapper.selectById(teamVO.getId());
         QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
         Long id = loginUser.getId();
-        queryWrapper.eq("team_id", teamDTO.getId());
+        queryWrapper.eq("team_id", teamVO.getId());
         long count = userTeamMapper.selectCount(queryWrapper);//队伍人数
         queryWrapper.eq("user_id", id);
         UserTeam userTeamI = userTeamMapper.selectOne(queryWrapper);
@@ -258,9 +258,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         // 4. 若队伍只剩一人，解散队伍
         QueryWrapper<UserTeam> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper1.eq("team_id", teamDTO.getId());
+        queryWrapper1.eq("team_id", teamVO.getId());
         if (count == 1) {
-            teamMapper.deleteById(teamDTO.getId());
+            teamMapper.deleteById(teamVO.getId());
             userTeamMapper.deleteById(userTeamI);
             return true;
         }
@@ -281,48 +281,48 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteTeam(TeamDTO teamDTO, User loginUser) {
+    public boolean deleteTeam(TeamVO teamVO, User loginUser) {
         // 1.检验请求参数是否为空
-        if (teamDTO == null || teamDTO.getId() <= 0) {
+        if (teamVO == null || teamVO.getId() <= 0) {
             return false;
         }
         // 2.检验身份为队长或管理员
-        if (loginUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), teamDTO.getUserId())) {
+        if (loginUser.getUserRole() != ADMIN_ROLE && !Objects.equals(loginUser.getId(), teamVO.getUserId())) {
             throw new BusinessException(ErrorCode.NO_AUTO, "无权限");
         }
         // 3.删除相关成员信息
         QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("team_id", teamDTO.getId());
+        queryWrapper.eq("team_id", teamVO.getId());
         userTeamMapper.delete(queryWrapper);
-        teamMapper.deleteById(teamDTO.getId());
+        teamMapper.deleteById(teamVO.getId());
         return true;
     }
 
 
     @Override
-    public List<TeamDTO> getMyTeam(User loginUser) {
+    public List<TeamVO> getMyTeam(User loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", loginUser.getId());
         List<Team> teams = teamMapper.selectList(queryWrapper);
-        List<TeamDTO> teamDTOs = new ArrayList<>();
+        List<TeamVO> teamVOS = new ArrayList<>();
         for (Team team : teams) {
-            TeamDTO teamDTO = new TeamDTO();
-            BeanUtils.copyProperties(team, teamDTO);
-            teamDTO.setPassword("");
+            TeamVO teamVO = new TeamVO();
+            BeanUtils.copyProperties(team, teamVO);
+            teamVO.setPassword("");
             QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-            userTeamQueryWrapper.eq("team_id", teamDTO.getId());
+            userTeamQueryWrapper.eq("team_id", teamVO.getId());
             Long l = userTeamMapper.selectCount(userTeamQueryWrapper);
-            teamDTO.setNowNum(l);
-            teamDTOs.add(teamDTO);
+            teamVO.setNowNum(l);
+            teamVOS.add(teamVO);
         }
-        return teamDTOs;
+        return teamVOS;
     }
 
     @Override
-    public List<TeamDTO> getJoinTeam(User loginUser) {
+    public List<TeamVO> getJoinTeam(User loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -335,26 +335,26 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<UserTeam> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("user_id", loginUser.getId());
         List<UserTeam> userTeams = userTeamMapper.selectList(queryWrapper1);
-        List<TeamDTO> teamDTOs = new ArrayList<>();
+        List<TeamVO> teamVOS = new ArrayList<>();
         for (UserTeam userTeam : userTeams) {
             Long userId = userTeam.getTeamId();
             Team team = teamMapper.selectById(userId);
             if (!team.getUserId().equals(id)) {
-                TeamDTO teamDTO = new TeamDTO();
-                BeanUtils.copyProperties(team, teamDTO);
-                teamDTO.setPassword("");
+                TeamVO teamVO = new TeamVO();
+                BeanUtils.copyProperties(team, teamVO);
+                teamVO.setPassword("");
                 QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-                userTeamQueryWrapper.eq("team_id", teamDTO.getId());
+                userTeamQueryWrapper.eq("team_id", teamVO.getId());
                 Long l = userTeamMapper.selectCount(userTeamQueryWrapper);
-                teamDTO.setNowNum(l);
-                teamDTOs.add(teamDTO);
+                teamVO.setNowNum(l);
+                teamVOS.add(teamVO);
             }
         }
-        return teamDTOs;
+        return teamVOS;
     }
 
     @Override
-    public List<TeamDTO> getTeams(User loginUser) {
+    public List<TeamVO> getTeams(User loginUser) {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未登录");
         }
@@ -363,46 +363,46 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<UserTeam> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("user_id", loginUser.getId());
         List<UserTeam> userTeams = userTeamMapper.selectList(queryWrapper1);
-        List<TeamDTO> teamDTOs = new ArrayList<>();
+        List<TeamVO> teamVOS = new ArrayList<>();
         for (UserTeam userTeam : userTeams) {
             Long teamId = userTeam.getTeamId();
             Team team = teamMapper.selectById(teamId);
-            TeamDTO teamDTO = new TeamDTO();
-            BeanUtils.copyProperties(team, teamDTO);
-            teamDTO.setPassword("");
+            TeamVO teamVO = new TeamVO();
+            BeanUtils.copyProperties(team, teamVO);
+            teamVO.setPassword("");
             QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-            userTeamQueryWrapper.eq("team_id", teamDTO.getId());
+            userTeamQueryWrapper.eq("team_id", teamVO.getId());
             Long l = userTeamMapper.selectCount(userTeamQueryWrapper);
-            teamDTO.setNowNum(l);
-            teamDTOs.add(teamDTO);
+            teamVO.setNowNum(l);
+            teamVOS.add(teamVO);
         }
-        return teamDTOs;
+        return teamVOS;
     }
 
     @Override
-    public List<TeamDTO> searchTeam(String teamName, User loginUser) {
+    public List<TeamVO> searchTeam(String teamName, User loginUser) {
         if (loginUser == null || teamName == null) {
             return null;
         }
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.like("team_name", teamName);
         List<Team> teams = teamMapper.selectList(queryWrapper);
-        List<TeamDTO> teamDTOs = new ArrayList<>();
+        List<TeamVO> teamVOS = new ArrayList<>();
         for (Team team : teams) {
-            TeamDTO teamDTO = new TeamDTO();
-            BeanUtils.copyProperties(team, teamDTO);
-            teamDTO.setPassword("");
+            TeamVO teamVO = new TeamVO();
+            BeanUtils.copyProperties(team, teamVO);
+            teamVO.setPassword("");
             QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-            userTeamQueryWrapper.eq("team_id", teamDTO.getId());
+            userTeamQueryWrapper.eq("team_id", teamVO.getId());
             Long l = userTeamMapper.selectCount(userTeamQueryWrapper);
-            teamDTO.setNowNum(l);
-            teamDTOs.add(teamDTO);
+            teamVO.setNowNum(l);
+            teamVOS.add(teamVO);
         }
-        return teamDTOs;
+        return teamVOS;
     }
 
     @Override
-    public List<TeamDTO> getOneTeam(Long teamId, User loginUser) {
+    public List<TeamVO> getOneTeam(Long teamId, User loginUser) {
         if (teamId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍不存在");
         }
@@ -412,13 +412,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", teamId);
         List<Team> teamList = teamMapper.selectList(queryWrapper);
-        List<TeamDTO> teamDTOs = new ArrayList<>();
+        List<TeamVO> teamVOS = new ArrayList<>();
         for (Team team : teamList) {
-            TeamDTO teamDTO = new TeamDTO();
-            BeanUtils.copyProperties(team, teamDTO);
-            teamDTO.setPassword("");
-            teamDTOs.add(teamDTO);
+            TeamVO teamVO = new TeamVO();
+            BeanUtils.copyProperties(team, teamVO);
+            teamVO.setPassword("");
+            teamVOS.add(teamVO);
         }
-        return teamDTOs;
+        return teamVOS;
     }
 }

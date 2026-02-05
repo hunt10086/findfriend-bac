@@ -1,6 +1,9 @@
 package com.dying.domain.vo;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * @Author daylight
@@ -8,11 +11,8 @@ import lombok.Data;
  */
 @Data
 public class UserVO {
-    /**
-     * 主键
-     */
-    private Long id;
 
+    private Long id;
     /**
      * 昵称
      */
@@ -24,9 +24,29 @@ public class UserVO {
     private String avatarUrl;
 
     /**
+     * 性别（0-未知 1-男 2-女）
+     */
+    private Integer gender;
+    /**
      * 标签
      */
     private String tags;
+
+    /**
+     * 电话
+     */
+    private String phone;
+
+    /**
+     * 邮箱
+     */
+    private String email;
+
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
 
     /**
      * 个人简介
@@ -35,6 +55,14 @@ public class UserVO {
 
     /**
      *  经度 纬度
+     */
+    private Double latitude;
+
+    private Double longitude;
+
+
+    /**
+     *  距离
      */
 
     private Double distance;

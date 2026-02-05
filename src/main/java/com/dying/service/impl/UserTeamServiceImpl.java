@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.domain.po.User;
 import com.dying.domain.po.UserTeam;
+import com.dying.domain.vo.UserVO;
 import com.dying.mapper.UserMapper;
 import com.dying.mapper.UserTeamMapper;
 import com.dying.service.UserService;
@@ -34,7 +35,7 @@ public class UserTeamServiceImpl extends ServiceImpl<UserTeamMapper, UserTeam>
     private UserService userService;
 
     @Override
-    public List<User> getTeamPeople(Long teamId, User loginUser){
+    public List<UserVO> getTeamPeople(Long teamId, User loginUser){
         if(loginUser==null||loginUser.getId()==null||loginUser.getId()<=0||teamId<=0){
             return  null;
         }
@@ -44,9 +45,9 @@ public class UserTeamServiceImpl extends ServiceImpl<UserTeamMapper, UserTeam>
         if(userTeams==null||userTeams.size()<=0){
             return null;
         }
-        List<User> users = new ArrayList<>();
+        List<UserVO> users = new ArrayList<>();
         for(UserTeam userTeam:userTeams){
-            User user = userService.getSaftyUser(userMapper.selectById(userTeam.getUserId()));
+            UserVO user = userService.getSafetyUser(userMapper.selectById(userTeam.getUserId()));
             users.add(user);
         }
         return users;

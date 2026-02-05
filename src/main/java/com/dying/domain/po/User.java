@@ -2,6 +2,7 @@ package com.dying.domain.po;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serial;
 import java.util.Date;
 import java.io.Serializable;
 import lombok.Data;
@@ -9,12 +10,15 @@ import lombok.Data;
 /**
  * 用户表
  *
+ * @author daylight
  * @TableName user
  */
 @TableName(value = "user")
 @Data
 public class User implements Serializable{
-    private static final long serialVersionUID = -4112100570009245441L; // 与序列化时一致
+    // 与序列化时一致
+    @Serial
+    private static final long serialVersionUID = -4112100570009245441L;
     /**
      * 主键
      */

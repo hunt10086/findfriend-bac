@@ -8,6 +8,7 @@ import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.constant.UserConstant;
 import com.dying.domain.po.User;
+import com.dying.domain.request.UserUpdateRequest;
 import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.UserLoginRequest;
 import com.dying.domain.request.UserRegisterRequest;
@@ -20,6 +21,7 @@ import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +43,8 @@ import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
  */
 @RestController()
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://www.seestars.top:9090", "http://localhost:9090"}, allowCredentials = "true")
 @Slf4j
-public class  UserController {
+public class UserController {
 
     @Resource
     private UserService userService;
@@ -60,13 +61,13 @@ public class  UserController {
 
     @Operation(summary = "发送验证码")
     @GetMapping("/sendCode")
-    public BaseResponse<Long>sendCode(@RequestParam String email) throws MessagingException, UnsupportedEncodingException {
+    public BaseResponse<Long> sendCode(@RequestParam String email) throws MessagingException, UnsupportedEncodingException {
         boolean flag = userService.checkEmail(email);
-        if(!flag) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码发送失败");
+        if (!flag) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码发送失败");
         }
-        String code=emailServiceImpl.sendEmailBackCode(email);
-        stringRedisTemplate.opsForValue().set(USER_CHECK_CODE+email,code,5, TimeUnit.MINUTES);
+        String code = emailServiceImpl.sendEmailBackCode(email);
+        stringRedisTemplate.opsForValue().set(USER_CHECK_CODE + email, code, 5, TimeUnit.MINUTES);
         return ResultUtils.success(1L);
     }
 
@@ -79,68 +80,66 @@ public class  UserController {
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        String email=userRegisterRequest.getEmail();
-        String code=userRegisterRequest.getCode();
-        if(!userPassword.equals(checkPassword)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"两次密码不一致");
+        String email = userRegisterRequest.getEmail();
+        String code = userRegisterRequest.getCode();
+        if (!userPassword.equals(checkPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码不一致");
         }
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(userPassword) || StringUtils.isBlank(checkPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号或密码为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号或密码为空");
         }
-        if(StringUtils.isBlank(email)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"邮箱为空");
+        if (StringUtils.isBlank(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱为空");
         }
-        if(!code.equals(stringRedisTemplate.opsForValue().get(USER_CHECK_CODE+email))){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码错误");
+        if (!code.equals(stringRedisTemplate.opsForValue().get(USER_CHECK_CODE + email))) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
-        long l = userService.userRegister(userAccount, userPassword, checkPassword,email);
+        long l = userService.userRegister(userAccount, userPassword, checkPassword, email);
         return ResultUtils.success(l);
     }
 
     @Operation(summary = "展示当前用户信息")
     @GetMapping("/current")
-    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
+    public BaseResponse<UserVO> getCurrentUser(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
-        if(currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
         long userId = currentUser.getId();
         User user = userService.getById(userId);
-        User saftyUser = userService.getSaftyUser(user);
-        return ResultUtils.success(saftyUser);
+        UserVO safetyUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
     }
 
     @Operation(summary = "登录请求")
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<UserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
         if (userLoginRequest == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"清输入账号，密码");
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "清输入账号，密码");
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
-        Double latitude = userLoginRequest.getLatitude();
-        Double longitude = userLoginRequest.getLongitude();
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户或密码为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户或密码为空");
         }
         log.info("登陆成功");
-        User user = userService.userLogin(userAccount, userPassword, request, latitude, longitude);
-        return ResultUtils.success(user);
+        UserVO userVO = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(userVO);
     }
 
     @Operation(summary = "查询所有用户")
     @GetMapping("/search")
-    public BaseResponse<List<User>> getUser(String username, HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> getUser(String username, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTO,"权限不足");
+            throw new BusinessException(ErrorCode.NO_AUTO, "权限不足");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(username)) {
             queryWrapper.like("user_name", username);
         }
         List<User> userList = userService.list(queryWrapper);
-        List<User> list = userList.stream().map(user -> userService.getSaftyUser(user)).collect(Collectors.toList());
+        List<UserVO> list = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
         return ResultUtils.success(list);
     }
 
@@ -148,10 +147,10 @@ public class  UserController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> userDelete(@RequestBody long id, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTO,"权限不够");
+            throw new BusinessException(ErrorCode.NO_AUTO, "权限不够");
         }
         if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
         boolean b = userService.removeById(id);
         return ResultUtils.success(b);
@@ -163,7 +162,7 @@ public class  UserController {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) attribute;
         if (user == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
         long userId = user.getId();
         User user1 = userService.getById(userId);
@@ -192,15 +191,14 @@ public class  UserController {
 
     @Operation(summary = "用户更新")
     @PostMapping("/update")
-    public BaseResponse<Boolean> userUpdate(@RequestBody User user, HttpServletRequest request) {
+    public BaseResponse<Boolean> userUpdate(@RequestBody UserUpdateRequest userUpdateRequest, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user1 = (User) attribute;
-        user.setId(user1.getId());
         if (user1 == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        if(!userService.userUpdate(user)){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"更改失败");
+        if (!userService.userUpdate(user1.getId(), userUpdateRequest)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更改失败");
         }
         return ResultUtils.success(true);
     }
@@ -220,41 +218,43 @@ public class  UserController {
 
     @Operation(summary = "主页用户推荐")
     @GetMapping("/listLike")
-    public BaseResponse<List<User>> userListLike(Integer count,HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> userListLike(Integer count, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
-        if(currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        List<User> list=userService.backLike(currentUser,count);
-        return ResultUtils.success(list,list.size());
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(currentUser, userVO);
+        List<UserVO> list = userService.backLike(userVO, count);
+        return ResultUtils.success(list, list.size());
     }
 
     @Operation(summary = "附近用户")
     @GetMapping("/nearUser")
     public BaseResponse<List<UserVO>> nearUser(HttpServletRequest request) {
-        Long id=checkLogin(request);
-        if(id==null||id<=0){
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+        Long id = checkLogin(request);
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
-        List<UserVO> list=userService.getNearUser(id);
+        List<UserVO> list = userService.getNearUser(id);
         return ResultUtils.success(list);
     }
 
     @Operation(summary = "根据id查询")
     @GetMapping("/search/one")
-    public BaseResponse<User> searchUserById(Long id, HttpServletRequest request) {
+    public BaseResponse<UserVO> searchUserById(Long id, HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) attribute;
-        if(currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
         User user = userMapper.selectById(id);
-        User saftyUser = userService.getSaftyUser(user);
-        if(user==null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
+        UserVO safetyUser = userService.getSafetyUser(user);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
-        return ResultUtils.success(saftyUser);
+        return ResultUtils.success(safetyUser);
     }
 
 
@@ -267,31 +267,13 @@ public class  UserController {
         return true;
     }
 
-    private Long checkLogin(HttpServletRequest request){
+    private Long checkLogin(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user1 = (User) attribute;
         if (user1 == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
         return user1.getId();
     }
-
-//    @GetMapping("/get/user")
-//    public BaseResponse<UserVo> getUserById(@PathParam("id") Long id,HttpServletRequest request){
-//        Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
-//        User currentUser = (User) attribute;
-//        if(currentUser == null) {
-//            throw new BusinessException(ErrorCode.NOT_LOGIN,"未登录");
-//        }
-//        User user = userService.getById(id);
-//        if(user==null){
-//            throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户不存在");
-//        }
-//        User saftyUser = userService.getSaftyUser(user);
-//        UserVo userVo=new UserVo();
-//        BeanUtil.copyProperties(user,userVo);
-//        userVo.setDistance(0.0);
-//        return ResultUtils.success(userVo);
-//    }
 
 }

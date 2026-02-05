@@ -3,6 +3,7 @@ package com.dying.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dying.domain.po.User;
 import com.dying.domain.po.UserTeam;
+import com.dying.domain.vo.UserVO;
 
 import java.util.List;
 
@@ -14,5 +15,5 @@ import java.util.List;
 */
 public interface UserTeamService extends IService<UserTeam> {
 
-    List<User> getTeamPeople(Long id, User loginUser);
+    List<UserVO> getTeamPeople(Long id, User loginUser);
 }
