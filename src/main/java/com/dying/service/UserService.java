@@ -26,8 +26,6 @@ public interface UserService extends IService<User> {
 
     boolean userUpdate(Long userId,UserUpdateRequest userUpdateRequest);
 
-    List<UserVO> searchAllByTags(List<String> tagsList);
-
     boolean checkEmail(String email);
 
     List<UserVO> backLike(UserVO loginUser,Integer count);

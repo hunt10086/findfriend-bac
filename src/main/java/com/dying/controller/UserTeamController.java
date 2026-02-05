@@ -4,6 +4,7 @@ import com.dying.common.BaseResponse;
 import com.dying.common.ErrorCode;
 import com.dying.common.ResultUtils;
 import com.dying.domain.po.User;
+import com.dying.domain.vo.UserVO;
 import com.dying.exception.BusinessException;
 import com.dying.service.UserTeamService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,7 +33,7 @@ public class UserTeamController {
 
     @Operation(summary = "获取队伍成员列表")
     @GetMapping("/list")
-    public BaseResponse<List<User>> list(Long teamId, HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> list(Long teamId, HttpServletRequest request) {
         if(teamId == null||teamId<=0){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"查询队伍不存在");
         }

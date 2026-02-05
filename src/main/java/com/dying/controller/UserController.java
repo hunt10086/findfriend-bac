@@ -158,7 +158,7 @@ public class UserController {
 
     @Operation(summary = "查询单个用户")
     @GetMapping("/searchOne")
-    public BaseResponse<List<User>> updateMassage(HttpServletRequest request) {
+    public BaseResponse<List<UserVO>> updateMassage(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);
         User user = (User) attribute;
         if (user == null) {
@@ -166,14 +166,15 @@ public class UserController {
         }
         long userId = user.getId();
         User user1 = userService.getById(userId);
-        List<User> list = new ArrayList<>();
-        list.add(user1);
+        UserVO safetyUser = userService.getSafetyUser(user1);
+        List<UserVO> list = new ArrayList<>();
+        list.add(safetyUser);
         return ResultUtils.success(list);
     }
 
     @Operation(summary = "根据标签分页查询用户")
     @GetMapping("/search/tags/page")
-    public BaseResponse<IPage<User>> searchUsersByTagsWithPagination(
+    public BaseResponse<IPage<UserVO>> searchUsersByTagsWithPagination(
             @RequestParam(required = false) List<String> tagsList,
             @RequestParam(defaultValue = "1") long currentPage,
             @RequestParam(defaultValue = "15") long pageSize) {
@@ -184,7 +185,7 @@ public class UserController {
         }
 
         // 执行分页查询
-        IPage<User> userPage = userService.searchUsersByTagsWithPagination(tagsList, currentPage, pageSize);
+        IPage<UserVO> userPage = userService.searchUsersByTagsWithPagination(tagsList, currentPage, pageSize);
 
         return ResultUtils.success(userPage);
     }

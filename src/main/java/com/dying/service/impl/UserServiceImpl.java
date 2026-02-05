@@ -109,8 +109,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         userMapper.insert(user);
         log.info("用户创建成功");
 
-        // 缓存预热：预先生成第一页推荐
-        backLike(user, 1);
 
         return 0;
     }
@@ -162,7 +160,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return null;
         }
         UserVO safetyUser = new UserVO();
-        BeanUtils.copyProperties(originUser, safetyUser);
+        // 只复制安全的字段，排除敏感信息
+        safetyUser.setId(originUser.getId());
+        safetyUser.setUserName(originUser.getUserName());
+        safetyUser.setAvatarUrl(originUser.getAvatarUrl());
+        safetyUser.setGender(originUser.getGender());
+        safetyUser.setTags(originUser.getTags());
+        safetyUser.setPhone(originUser.getPhone());
+        safetyUser.setEmail(originUser.getEmail());
+        safetyUser.setCreateTime(originUser.getCreateTime());
+        safetyUser.setProfile(originUser.getProfile());
+        safetyUser.setLatitude(originUser.getLatitude());
+        safetyUser.setLongitude(originUser.getLongitude());
+        // 注意：不设置userPassword、userAccount、userRole等敏感字段
+
         return safetyUser;
     }
 
@@ -189,29 +200,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 移除登录态
         request.getSession().invalidate();
         return 1;
-    }
-
-    /**
-     *
-     * @param tagsList
-     * sql 查询
-     */
-    @Override
-    public List<UserVO> searchAllByTags(List<String> tagsList) {
-        if (CollectionUtils.isEmpty(tagsList)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
-        }
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if (stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList) != null) {
-            return JSONUtil.toList(stringRedisTemplate.opsForValue().get(USER_LIKE_STATE + tagsList), UserVO.class);
-        }
-        for (String tag : tagsList) {
-            queryWrapper = queryWrapper.like("tags", tag);
-        }
-        List<User> userList = userMapper.selectList(queryWrapper);
-        List<UserVO> list = userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
-        stringRedisTemplate.opsForValue().set(USER_LIKE_STATE + tagsList, JSONUtil.toJsonStr(list), USER_REDIS_EXPIRE, TimeUnit.MINUTES);
-        return list;
     }
 
     @Override
@@ -369,7 +357,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (StringUtils.isNotBlank(cachedResult)) {
             try {
                 // 从缓存中获取分页信息
-                IPage<UserVO> cachedPage = JSONUtil.toBean(cachedResult, Page.class);
+                IPage<UserVO> cachedPage = JSONUtil.toBean(cachedResult, IPage.class);
                 log.info("从Redis缓存中获取标签查询结果，标签：{}，页码：{}", tagsKey, currentPage);
                 return cachedPage;
             } catch (Exception e) {
@@ -394,23 +382,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 执行分页查询
         IPage<User> userPage = userMapper.selectPage(page, queryWrapper);
 
-        // 对查询结果进行脱敏处理
+        // 对查询结果进行脱敏处理并创建新的分页对象
         List<UserVO> safeUsers = userPage.getRecords().stream()
                 .map(this::getSafetyUser)
                 .collect(Collectors.toList());
 
-        userPage.setRecords(safeUsers);
+        // 创建一个新的IPage<UserVO>实例
+        Page<UserVO> safeUserPage = new Page<>();
+        safeUserPage.setCurrent(userPage.getCurrent());
+        safeUserPage.setSize(userPage.getSize());
+        safeUserPage.setTotal(userPage.getTotal());
+        safeUserPage.setPages(userPage.getPages());
+        safeUserPage.setRecords(safeUsers);
 
         // 将查询结果存入Redis缓存，设置25分钟过期时间
         try {
-            String pageJson = JSONUtil.toJsonStr(userPage);
+            String pageJson = JSONUtil.toJsonStr(safeUserPage);
             stringRedisTemplate.opsForValue().set(cacheKey, pageJson, 25, TimeUnit.MINUTES);
             log.info("标签查询结果已缓存，标签：{}，页码：{}，缓存过期时间：25分钟", tagsKey, currentPage);
         } catch (Exception e) {
             log.warn("缓存写入失败", e);
         }
 
-        return userPage;
+        return safeUserPage;
     }
 
 }

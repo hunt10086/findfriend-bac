@@ -25,17 +25,6 @@ class findFriendApplicationTests {
     private UserService userService;
 
     @Test
-    void getUserByTags(){
-        List<String> tags = new ArrayList<>();
-        tags.add("java");
-        tags.add("python");
-        List<UserVO> list= userService.searchAllByTags(tags);
-        for(UserVO user:list){
-            System.out.println(user.toString());
-        }
-    }
-
-    @Test
     void checkEmail(){
 //        boolean flag = userService.checkEmail();
         boolean flag= Validator.isEmail("2646130539@qq.com");

@@ -12,6 +12,7 @@ import com.dying.exception.BusinessException;
 import com.dying.mapper.UserMapper;
 import com.dying.service.FriendRequestsService;
 import com.dying.service.FriendsService;
+import com.dying.service.UserService;
 import com.dying.mapper.FriendsMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +37,9 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserService userService;
 
     @Override
     public boolean agreeFriendRequest(FriendRequests friendRequests, HttpServletRequest request) {
@@ -95,9 +99,7 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
         if (friendUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友不存在");
         } else {
-            UserVO userVO = new UserVO();
-            BeanUtil.copyProperties(friendUser, userVO);
-            return userVO;
+            return userService.getSafetyUser(friendUser);
         }
     }
 
@@ -116,9 +118,7 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
                     if (friendUser == null) {
                         return null;
                     }
-                    UserVO userVO = new UserVO();
-                    BeanUtil.copyProperties(friendUser, userVO);
-                    return userVO;
+                    return userService.getSafetyUser(friendUser);
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -142,13 +142,13 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
         friend.setStatus(0); //删除好友关系
 
         QueryWrapper<Friends> queryWrapper2 = new QueryWrapper<>();
-        queryWrapper.eq("user_id", friendUserId)
+        queryWrapper2.eq("user_id", friendUserId)
                 .eq("friend_id", userId)
                 .eq("status", 1);
-        Friends friend2 = this.getOne(queryWrapper);
+        Friends friend2 = this.getOne(queryWrapper2);
         friend2.setStatus(0);
-        boolean flag=this.updateById(friend2);
-        return this.updateById(friend)&&flag;
+        boolean flag = this.updateById(friend2);
+        return this.updateById(friend) && flag;
     }
 
 
