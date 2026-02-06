@@ -19,7 +19,9 @@ import com.dying.utils.MD5Utils;
 import com.dying.utils.RegexUtils;
 import com.dying.utils.UserRecommendationUtils;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -193,12 +195,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public int userLogout(HttpServletRequest request) {
+    public int userLogout(HttpServletRequest request, HttpServletResponse response) {
         if (request == null) {
             return 0;
         }
         // 移除登录态
         request.getSession().invalidate();
+        // 清除 JSESSIONID cookie
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setMaxAge(0);  // 设置为0秒过期
+        cookie.setPath("/");   // 设置cookie路径，以确保所有路径下都能清除
+        response.addCookie(cookie);  // 将清除的cookie返回给浏览器
+
         return 1;
     }
 

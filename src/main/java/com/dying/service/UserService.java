@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
 * @author 666
@@ -22,7 +23,7 @@ public interface UserService extends IService<User> {
 
     UserVO getSafetyUser(User originUser);
 
-    int userLogout(HttpServletRequest request);
+    int userLogout(HttpServletRequest request, HttpServletResponse response);
 
     boolean userUpdate(Long userId,UserUpdateRequest userUpdateRequest);
 
