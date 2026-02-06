@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author daylight
+ */
 @Data
 public class UserRegisterRequest implements Serializable {
     private static final long serialVersionUID = 1L;

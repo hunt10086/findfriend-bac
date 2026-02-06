@@ -13,9 +13,11 @@ import com.dying.domain.vo.UserVO;
 import com.dying.domain.request.UserLoginRequest;
 import com.dying.domain.request.UserRegisterRequest;
 import com.dying.exception.BusinessException;
+import com.dying.exception.ThrowUtils;
 import com.dying.mapper.UserMapper;
 import com.dying.service.UserService;
 import com.dying.service.impl.EmailServiceImpl;
+import com.dying.utils.MD5Utils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.dying.constant.RedisConstant.FORGET_PASSWORD;
 import static com.dying.constant.UserConstant.USER_CHECK_CODE;
 import static com.dying.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -59,6 +62,8 @@ public class UserController {
     @Resource
     private UserMapper userMapper;
 
+    private static final String SALT = "Dying";
+
 
     @Operation(summary = "发送验证码")
     @GetMapping("/sendCode")
@@ -69,6 +74,18 @@ public class UserController {
         }
         String code = emailServiceImpl.sendEmailBackCode(email);
         stringRedisTemplate.opsForValue().set(USER_CHECK_CODE + email, code, 5, TimeUnit.MINUTES);
+        return ResultUtils.success(1L);
+    }
+
+    @Operation(summary = "发送找回密码验证码")
+    @GetMapping("/sendCode/pa")
+    public BaseResponse<Long>sendCodePa(@RequestParam String email) throws MessagingException, UnsupportedEncodingException {
+        boolean flag = userService.checkEmail(email);
+        if(!flag) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码发送失败");
+        }
+        String code=emailServiceImpl.sendEmailToBackPassword(email);
+        stringRedisTemplate.opsForValue().set(FORGET_PASSWORD+email,code,5, TimeUnit.MINUTES);
         return ResultUtils.success(1L);
     }
 
@@ -259,6 +276,44 @@ public class UserController {
         return ResultUtils.success(safetyUser);
     }
 
+
+    @PostMapping("/forgetPassword")
+    @Operation(summary = "忘记密码", description = "忘记密码")
+    public BaseResponse<Boolean> forgetPassword(@RequestBody UserRegisterRequest userRegisterRequest) {
+        ThrowUtils.throwIf(userRegisterRequest==null, ErrorCode.PARAMS_ERROR,"参数为空");
+
+        String userAccount = userRegisterRequest.getUserAccount();
+        User user=userService.lambdaQuery().eq(User::getUserAccount, userAccount).one();
+        if(user==null){
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"用户不存在");
+        }
+        String email=user.getEmail();
+        if(email==null){
+            throw new BusinessException(ErrorCode.OPERATION_ERROR,"操作失败");
+        }
+
+        String code = userRegisterRequest.getCode();
+        if(!code.equals(stringRedisTemplate.opsForValue().get(FORGET_PASSWORD+email))){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码错误");
+        }
+
+        String password = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+
+        if (StringUtils.isBlank(password)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码为空");
+        }
+        if (StringUtils.isBlank(checkPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "第二次输入密码为空");
+        }
+        //密码不小于八位
+        if (password.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码不小于八位");
+        }
+        String newPassword = MD5Utils.string2MD5(SALT + password + SALT);
+        user.setUserPassword(newPassword);
+        return ResultUtils.success(userService.updateById(user));
+    }
 
     public boolean isAdmin(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(USER_LOGIN_STATE);

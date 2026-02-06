@@ -30,7 +30,4 @@
         phone,email,user_status,create_time,update_time,
         is_delete,user_role,tags,profile,longitude,latitude
     </sql>
-    <select id="findAllByUserAccountBoolean" resultType="java.lang.Boolean">
-        select * from user where user_account =#{userAccount}
-    </select>
 </mapper>

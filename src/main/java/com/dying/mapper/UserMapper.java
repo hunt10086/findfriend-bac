@@ -10,10 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @Entity com.dying.domain.po.User
 */
 public interface UserMapper extends BaseMapper<User> {
-
-    public User findAllByUserAccountBoolean(String userAccount);
-
-
 }
 
 

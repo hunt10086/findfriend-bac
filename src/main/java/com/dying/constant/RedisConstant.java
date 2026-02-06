@@ -6,4 +6,6 @@ package com.dying.constant;
  */
 public interface RedisConstant {
     String BLOG_LIKE = "blogLike:";
+
+    String FORGET_PASSWORD = "forget_password:";
 }

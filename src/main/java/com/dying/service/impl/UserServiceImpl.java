@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dying.common.ErrorCode;
@@ -82,27 +83,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (password.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码不小于八位");
         }
-        //账号不能重复
-        User flag = userMapper.findAllByUserAccountBoolean(userAccount);
-
-        if (flag != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号不能重复");
+        //账号名，邮箱不能重复
+        User one = this.lambdaQuery().eq(User::getUserAccount, userAccount).one();
+        if (one != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号名被注册");
         }
+        User two = this.lambdaQuery().eq(User::getEmail, email).one();
+        if (two != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该邮箱已注册");
+        }
+
         //不允许出现特殊字符
         String regEx = "\\pP|\\pS|\\s+";
         String str = Pattern.compile(regEx).matcher(userAccount).replaceAll("").trim();
         if (!userAccount.equals(str)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "不允许出现特殊字符");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号不允许出现特殊字符");
         }
 
         if (!checkPassword.equals(password)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码不相同");
         }
 
-        String newpassword = MD5Utils.string2MD5(SALT + password + SALT);
+        String newPassword = MD5Utils.string2MD5(SALT + password + SALT);
         User user = new User();
         user.setUserAccount(userAccount);
-        user.setUserPassword(newpassword);
+        user.setUserPassword(newPassword);
         user.setEmail(email);
         user.setUserStatus(0);
         user.setCreateTime(new Date());
@@ -110,7 +115,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         userMapper.insert(user);
         log.info("用户创建成功");
-
 
         return 0;
     }
@@ -203,9 +207,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         request.getSession().invalidate();
         // 清除 JSESSIONID cookie
         Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setMaxAge(0);  // 设置为0秒过期
-        cookie.setPath("/");   // 设置cookie路径，以确保所有路径下都能清除
-        response.addCookie(cookie);  // 将清除的cookie返回给浏览器
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
 
         return 1;
     }
