@@ -62,6 +62,10 @@ public class UserCommentServiceImpl extends ServiceImpl<UserCommentMapper, UserC
         List<UserComment> userComments = userCommentMapper.selectList(queryWrapper);
         for(UserComment userComment : userComments) {
             User user=userMapper.selectById(userComment.getUserId());
+            // 跳过已被删除的用户
+            if (user == null) {
+                continue;
+            }
             CommentVO commentVO=new CommentVO();
             commentVO.setUserName(user.getUserName());
             commentVO.setAvatarUrl(user.getAvatarUrl());

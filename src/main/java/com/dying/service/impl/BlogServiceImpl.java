@@ -78,6 +78,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         if(blogRequest.getId()!=null){
             Blog updateBlog = blogMapper.selectById(blogRequest.getId());
             ThrowUtils.throwIf(updateBlog==null,ErrorCode.PARAMS_ERROR,"参数错误");
+            // 检查是否是博客作者
+            if (!Objects.equals(updateBlog.getUserId(), loginUser.getId())) {
+                throw new BusinessException(ErrorCode.NO_AUTO, "无权限修改他人的博客");
+            }
             updateBlog.setTitle(blogRequest.getTitle());
             updateBlog.setPassage(blogRequest.getPassage());
             updateBlog.setStatus(status);
@@ -105,6 +109,10 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         }
         // 1.检验返回值为空  是否登录
         if (loginUser == null || loginUser.getId() == null || blogRequest == null || loginUser.getId() < 0) {
+            return false;
+        }
+        // 检查是否是博客作者
+        if (!Objects.equals(blog1.getUserId(), loginUser.getId())) {
             return false;
         }
         // 2. 标题，文章不能为空

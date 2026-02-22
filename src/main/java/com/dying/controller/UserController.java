@@ -141,8 +141,8 @@ public class UserController {
         if (StringUtils.isBlank(userAccount) || StringUtils.isBlank(userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户或密码为空");
         }
-        log.info("登陆成功");
         UserVO userVO = userService.userLogin(userAccount, userPassword, request);
+        log.info("登陆成功");
         return ResultUtils.success(userVO);
     }
 
@@ -269,10 +269,10 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
         }
         User user = userMapper.selectById(id);
-        UserVO safetyUser = userService.getSafetyUser(user);
         if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
         }
+        UserVO safetyUser = userService.getSafetyUser(user);
         return ResultUtils.success(safetyUser);
     }
 
@@ -293,9 +293,13 @@ public class UserController {
         }
 
         String code = userRegisterRequest.getCode();
-        if(!code.equals(stringRedisTemplate.opsForValue().get(FORGET_PASSWORD+email))){
+        String redisCode = stringRedisTemplate.opsForValue().get(FORGET_PASSWORD + email);
+        if(!code.equals(redisCode)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"验证码错误");
         }
+
+        // 验证成功后删除验证码，防止重复使用
+        stringRedisTemplate.delete(FORGET_PASSWORD + email);
 
         String password = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();

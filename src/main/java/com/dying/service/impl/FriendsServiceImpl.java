@@ -85,10 +85,14 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
         }
         Long userId = loginUser.getId();
         QueryWrapper<Friends> queryWrapper = new QueryWrapper<>();
-        QueryWrapper<Friends> eq = queryWrapper.eq("user_id", userId)
+        queryWrapper.eq("user_id", userId)
                 .eq("friend_id", friendUserId)
                 .eq("status", 1);
-        this.getOne(eq);
+        Friends friendRelation = this.getOne(queryWrapper);
+        // 检查好友关系是否存在
+        if (friendRelation == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "你们不是好友");
+        }
         User friendUser = userMapper.selectById(friendUserId);
         if (friendUser == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "好友不存在");
@@ -138,8 +142,11 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
                 .eq("friend_id", userId)
                 .eq("status", 1);
         Friends friend2 = this.getOne(queryWrapper2);
-        friend2.setStatus(0);
-        boolean flag = this.updateById(friend2);
+        boolean flag = false;
+        if (friend2 != null) {
+            friend2.setStatus(0);
+            flag = this.updateById(friend2);
+        }
         return this.updateById(friend) && flag;
     }
 

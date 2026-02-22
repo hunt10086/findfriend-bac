@@ -209,6 +209,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         Team team = teamMapper.selectById(teamVO.getId());
+        // 队伍不存在
+        if (team == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "队伍不存在");
+        }
         // 3.不能加入自己的队伍
         if (Objects.equals(loginUser.getId(), team.getUserId())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "不能加入自己的队伍");
@@ -264,8 +268,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         long count = userTeamMapper.selectCount(queryWrapper);
         queryWrapper.eq("user_id", id);
         UserTeam userTeamI = userTeamMapper.selectOne(queryWrapper);
-        long count1 = userTeamMapper.selectCount(queryWrapper);
-        if (count1 < 1) {
+        if (userTeamI == null) {
             return false;
         }
         // 4. 若队伍只剩一人，解散队伍

@@ -9,6 +9,7 @@ import lombok.Data;
 
 /**
  * 用户评论
+ * @author daylight
  * @TableName user_comment
  */
 @TableName(value ="user_comment")

@@ -3,9 +3,14 @@ package com.dying.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.dying.common.ErrorCode;
 import com.dying.domain.po.FriendMessages;
+import com.dying.domain.po.Friends;
+import com.dying.exception.BusinessException;
 import com.dying.mapper.FriendMessagesMapper;
+import com.dying.mapper.FriendsMapper;
 import com.dying.service.FriendMessagesService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,17 +25,32 @@ import java.util.List;
 public class FriendMessagesServiceImpl extends ServiceImpl<FriendMessagesMapper, FriendMessages>
         implements FriendMessagesService {
 
+    @Resource
+    private FriendsMapper friendsMapper;
+
     @Override
     public boolean sendFriendMessage(Long senderId, Long receiverId, String content) {
         try {
+            // 验证是否是好友关系
+            QueryWrapper<Friends> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("user_id", senderId)
+                    .eq("friend_id", receiverId)
+                    .eq("status", 1);
+            Friends friend = friendsMapper.selectOne(queryWrapper);
+            if (friend == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "你们不是好友，无法发送消息");
+            }
+
             FriendMessages message = new FriendMessages();
             message.setSenderId(senderId);
             message.setReceiverId(receiverId);
             message.setMessageContent(content);
             message.setSendTime(new Date());
-            // 新消息默认为未读状态
-            message.setStatus(0);
+            // 新消息默认为正常状态（未读），根据表注释：0-已删除，1-正常
+            message.setStatus(1);
             return this.save(message);
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

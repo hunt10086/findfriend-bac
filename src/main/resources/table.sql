@@ -12,7 +12,7 @@ create table if not exists blog
     praise      int                                null comment '文章获赞',
     status      tinyint  default 0                 not null comment '文章状态'
 )
-    comment '博客文章';
+    comment '博客文章' row_format = DYNAMIC;
 
 create table if not exists friend_messages
 (
@@ -24,7 +24,8 @@ create table if not exists friend_messages
     send_time       datetime default CURRENT_TIMESTAMP null comment '发送时间',
     status          int      default 1                 null comment '消息状态：0-已删除，1-正常'
 )
-    comment '好友消息表' collate = utf8mb4_unicode_ci;
+    comment '好友消息表' collate = utf8mb4_unicode_ci
+                         row_format = DYNAMIC;
 
 create index idx_receiver_status
     on friend_messages (receiver_id);
@@ -46,7 +47,7 @@ create table if not exists friend_requests
     create_time  datetime default CURRENT_TIMESTAMP null,
     update_time  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP
 )
-    comment '好友申请表';
+    comment '好友申请表' row_format = DYNAMIC;
 
 create index idx_from_user
     on friend_requests (from_user_id);
@@ -66,7 +67,8 @@ create table if not exists friends
     constraint uk_user_friend
         unique (user_id, friend_id)
 )
-    comment '好友关系表' collate = utf8mb4_unicode_ci;
+    comment '好友关系表' collate = utf8mb4_unicode_ci
+                         row_format = DYNAMIC;
 
 create index idx_friend_id
     on friends (friend_id);
@@ -89,7 +91,7 @@ create table if not exists team
     is_delete   tinyint  default 0                 not null comment '是否删除',
     icon        varchar(512)                       null comment '队伍头像'
 )
-    comment '队伍';
+    comment '队伍' row_format = DYNAMIC;
 
 create table if not exists team_chat_message
 (
@@ -100,7 +102,7 @@ create table if not exists team_chat_message
     content     varchar(500)                       not null comment '消息内容',
     create_time datetime default CURRENT_TIMESTAMP not null comment '发送时间'
 )
-    comment '队伍聊天消息表';
+    comment '队伍聊天消息表' row_format = DYNAMIC;
 
 create index idx_team_id
     on team_chat_message (team_id);
@@ -135,7 +137,8 @@ create table if not exists user
     constraint userAccount_unique
         unique (user_account)
 )
-    comment '用户表' collate = utf8mb4_unicode_ci;
+    comment '用户表' collate = utf8mb4_unicode_ci
+                     row_format = DYNAMIC;
 
 create index idx_create_time_is_delete
     on user (create_time, is_delete);
@@ -154,7 +157,7 @@ create table if not exists user_comment
     is_delete   tinyint  default 0                 not null comment '是否删除',
     content     varchar(256)                       not null comment '评论'
 )
-    comment '用户评论';
+    comment '用户评论' row_format = DYNAMIC;
 
 create table if not exists user_team
 (
@@ -167,5 +170,5 @@ create table if not exists user_team
     update_time datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
     is_delete   tinyint  default 0                 not null comment '是否删除'
 )
-    comment '用户队伍关系';
+    comment '用户队伍关系' row_format = DYNAMIC;
 

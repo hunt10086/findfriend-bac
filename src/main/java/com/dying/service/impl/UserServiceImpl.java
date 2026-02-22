@@ -206,7 +206,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 移除登录态
         request.getSession().invalidate();
         // 清除 JSESSIONID cookie
-        Cookie cookie = new Cookie("JSESSIONID", null);
+        Cookie cookie = new Cookie("SESSION", null);
         cookie.setMaxAge(0);
         cookie.setPath("/");
         response.addCookie(cookie);
@@ -322,11 +322,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 
     public double getDistance(Double longitude1, Double latitude1, Double longitude2, Double latitude2) {
-        geoService.addLocation("cities", "Beijing", longitude1, latitude1);
-        geoService.addLocation("cities", "Shanghai", longitude2, latitude2);
+        // 使用Haversine公式计算两点之间的距离
+        final double R = 6371; // 地球半径，单位km
+        double lat1 = Math.toRadians(latitude1);
+        double lat2 = Math.toRadians(latitude2);
+        double lon1 = Math.toRadians(longitude1);
+        double lon2 = Math.toRadians(longitude2);
 
-        // 计算距离
-        return geoService.getDistance("cities", "Beijing", "Shanghai");
+        double dLat = lat2 - lat1;
+        double dLon = lon2 - lon1;
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
     }
 
     @Override
